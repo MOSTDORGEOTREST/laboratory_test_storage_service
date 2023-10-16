@@ -1,8 +1,8 @@
-# Georeport backend
+# MDGT Laboratory Test Storage Service
 
 ### Сервис для хранения результатов лабораторных испытаний грунтов. 
 
-![Схема](https://github.com/MOSTDORGEOTREST/laboratory_test_storage_service/blob/master/diagram.png)
+![Схема](https://github.com/MOSTDORGEOTREST/laboratory_test_storage_service/blob/main/diagram.png)
 
 #### Функционал:
 * авторизация по токену (JWT)
