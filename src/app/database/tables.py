@@ -4,6 +4,7 @@ from sqlalchemy import (
     JSON,
     ForeignKey,
     BigInteger,
+    Integer,
     DateTime,
     Index
 )
@@ -42,7 +43,7 @@ class Tests(Base):
 
     test_id = Column(BigInteger, primary_key=True, autoincrement=True)
     sample_id = Column(String(32), ForeignKey('samples.sample_id'), index=True)
-    test_type_id = Column(String(32), ForeignKey('test_types.test_type_id'), index=True)
+    test_type_id = Column(Integer, ForeignKey('test_types.test_type_id'), index=True)
     timestamp = Column(DateTime(timezone=True), server_default=func.now())
     test_params = Column(JSON, nullable=True, default=None)
     test_results = Column(JSON, nullable=True, default=None)
@@ -51,7 +52,7 @@ class Tests(Base):
 class TestTypes(Base):
     __tablename__ = "test_types"
 
-    test_type_id = Column(BigInteger, primary_key=True, autoincrement=True)
+    test_type_id = Column(Integer, primary_key=True, autoincrement=True)
     test_type = Column(String(500))
     description = Column(String(500), default=None)
 
