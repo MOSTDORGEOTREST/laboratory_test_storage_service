@@ -10,6 +10,7 @@ from database.database import (
     engine,
     Base
 )
+from api import router
 
 def create_ip_ports_array(ip: str, *ports):
     array = []
@@ -39,7 +40,7 @@ app.add_middleware(
                    "Authorization", "Accept", "X-Requested-With"],
 )
 
-#app.include_router(router)
+app.include_router(router)
 
 @app.get("/", response_class=HTMLResponse)
 async def index():

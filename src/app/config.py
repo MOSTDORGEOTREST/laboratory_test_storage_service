@@ -15,7 +15,8 @@ class Configs:
     database_url: str = os.environ.get('DATABASE_URL')
     superuser_name: str = os.environ.get('SUPERUSER_NAME')
     superuser_password: str = os.environ.get('SUPERUSER_PASSWORD')
+    jwt_secret: str = os.environ.get('JWT_SECRET')
+    jwt_algorithm: str = os.environ.get('JWT_ALGORITHM')
+    jwt_expiration: int = os.environ.get('JWT_EXPIRATION')
 
 configs = Configs()
-
-print(configs.database_url)
