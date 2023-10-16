@@ -21,6 +21,8 @@ class Objects(Base):
     location = Column(Geometry('POINT'), default=None)
     description = Column(String(500), default=None)
 
+    boreholes = relationship("Boreholes")
+
 class Boreholes(Base):
     __tablename__ = "boreholes"
 
@@ -28,6 +30,8 @@ class Boreholes(Base):
     borehole_name = Column(String(50))
     object_id = Column(String(32), ForeignKey('objects.object_id'), index=True)
     description = Column(String(500), default=None)
+
+    samples = relationship("Samples")
 
 class Samples(Base):
     __tablename__ = "samples"
@@ -37,6 +41,8 @@ class Samples(Base):
     laboratory_number = Column(String(50))
     soil_type = Column(String(500))
     description = Column(String(500), default=None)
+
+    tests = relationship("Tests")
 
 class Tests(Base):
     __tablename__ = "tests"
@@ -48,6 +54,8 @@ class Tests(Base):
     test_params = Column(JSON, nullable=True, default=None)
     test_results = Column(JSON, nullable=True, default=None)
     description = Column(String(500), default=None)
+
+    files = relationship("Files")
 
 class TestTypes(Base):
     __tablename__ = "test_types"
