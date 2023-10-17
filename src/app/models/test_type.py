@@ -12,3 +12,6 @@ class TestType(TestTypeBase):
 
 class TestTypeUpdate(TestTypeBase):
     pass
+
+class TestTypeCreate(TestTypeBase):
+    pass

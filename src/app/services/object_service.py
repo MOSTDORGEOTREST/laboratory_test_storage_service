@@ -1,5 +1,5 @@
 from typing import Optional, List
-from fastapi import HTTPException, status
+from fastapi import status
 from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
 from sqlalchemy.future import select
@@ -107,7 +107,7 @@ class ObjectService:
                 try:
                     await self._get_object(borehole.object_id)
                 except:
-                    raise Exception(f'Object {borehole.object_id} do not exist')
+                    raise Exception(f'Object {borehole.object_id} does not exist')
 
                 stmt_borehole = insert(tables.Boreholes).values(
                     **borehole.dict()
@@ -142,7 +142,7 @@ class ObjectService:
                 try:
                     await self._get_borehole(sample.borehole_id)
                 except:
-                    raise Exception(f'Borehole {sample.borehole_id} do not exist')
+                    raise Exception(f'Borehole {sample.borehole_id} does not exist')
 
                 stmt_sample = insert(tables.Samples).values(
                     **sample.dict()
@@ -305,75 +305,4 @@ class ObjectService:
         await self.session.execute(q)
 
         await self.session.commit()
-
-
-test_data = {
-    "object": {
-        "object_id": "lU7MGLdT9mN6aXjgCxqkqSixNRbhfjTA",
-        "object_number": "111-11",
-    },
-    "boreholes": [
-        {
-            "borehole_id": "voeSOHOIgB6dYC3j7LjlEwPANT5E09ae",
-            "borehole_name": "Cкважина 1",
-            "object_id": "lU7MGLdT9mN6aXjgCxqkqSixNRbhfjTA",
-        },
-        {
-            "borehole_id": "IdOwUktwXGlkSn1jiKgYUcjqh5B4xxXG",
-            "borehole_name": "Cкважина 2",
-            "object_id": "lU7MGLdT9mN6aXjgCxqkqSixNRbhfjTA",
-        },
-        {
-            "borehole_id": "oJY7KtZy1qDrA3NxBDHSS8oSG2kEYb3M",
-            "borehole_name": "Cкважина 3",
-            "object_id": "lU7MGLdT9mN6aXjgCxqkqSixNRbhfjTA",
-        },
-
-    ],
-    "samples": [
-        {
-            "borehole_id": "voeSOHOIgB6dYC3j7LjlEwPANT5E09ae",
-            "sample_id": "wVPddOIxR3Atks9Uk47wuzZ33zwj0HS8",
-            "laboratory_number": "11-1",
-            "soil_type": "Суглинок",
-        },
-{
-            "borehole_id": "voeSOHOIgB6dYC3j7LjlEwPANT5E09ae",
-            "sample_id": "KDajpo2gZfgEziujZ260QK9q7Isj0Ivl",
-            "laboratory_number": "11-2",
-            "soil_type": "Глина пластичная",
-        },
-{
-            "borehole_id": "voeSOHOIgB6dYC3j7LjlEwPANT5E09ae",
-            "sample_id": "XyRpq95O3AyIvvgNdHi9jRB593U0aqyI",
-            "laboratory_number": "11-3",
-            "soil_type": "Супесь",
-        },
-        {
-            "borehole_id": "IdOwUktwXGlkSn1jiKgYUcjqh5B4xxXG",
-            "sample_id": "qvorVHlVuJeaz9mWVqgm3CIdBqaHa0yx",
-            "laboratory_number": "12-1",
-            "soil_type": "Песок",
-        },
-        {
-            "borehole_id": "oJY7KtZy1qDrA3NxBDHSS8oSG2kEYb3M",
-            "sample_id": "WXeFV9FLq7rPtoGooTF8eMlW8Wgbc1ev",
-            "laboratory_number": "10-1",
-            "soil_type": "Песок",
-        },
-{
-            "borehole_id": "oJY7KtZy1qDrA3NxBDHSS8oSG2kEYb3M",
-            "sample_id": "PMZaoMF24AHFmAkgNHtE6t4IfUWkZa4G",
-            "laboratory_number": "10-2",
-            "soil_type": "Песок гравийный",
-        },
-{
-            "borehole_id": "oJY7KtZy1qDrA3NxBDHSS8oSG2kEYb3M",
-            "sample_id": "Q18wEMxp0Ui34Z3K4VpQbVg8QknXK8uV",
-            "laboratory_number": "10-3",
-            "soil_type": "Песок пылеватый",
-        },
-
-    ],
-}
 
