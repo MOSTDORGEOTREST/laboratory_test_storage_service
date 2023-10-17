@@ -1,7 +1,7 @@
 from fastapi import status, HTTPException
 
 exception_token = HTTPException(
-    status_code=status.HTTP_403_FORBIDDEN,
+    status_code=status.HTTP_401_UNAUTHORIZED,
     detail="Authentication failed",
     headers={"WWW-Authenticate": "Bearer"},
 )

@@ -3,7 +3,6 @@ from typing import Optional
 
 class ObjectBase(BaseModel):
     object_number: str
-    location: Optional[tuple] = None
     description: Optional[str] = None
 
 class Object(ObjectBase):

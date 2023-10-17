@@ -15,6 +15,20 @@ class Test(TestBase):
     class Config:
         from_attributes = True
 
+class TestFullView(BaseModel):
+    test_id: int
+    object_number: str
+    borehole_name: str
+    laboratory_number: str
+    soil_type: str
+    test_type: str
+    timestamp: datetime
+    test_params: Optional[dict] = None
+    test_results: Optional[dict] = None
+    description: Optional[str] = None
+    class Config:
+        from_attributes = True
+
 class TestCreate(TestBase):
     pass
 

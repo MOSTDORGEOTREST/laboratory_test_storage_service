@@ -18,7 +18,6 @@ class Objects(Base):
 
     object_id = Column(String(32), primary_key=True, comment='from EngGeo')
     object_number = Column(String(10), unique=True)
-    location = Column(Geometry('POINT'), default=None)
     description = Column(String(500), default=None)
 
     boreholes = relationship("Boreholes")
