@@ -60,7 +60,7 @@ class TestTypes(Base):
     __tablename__ = "test_types"
 
     test_type_id = Column(Integer, primary_key=True, autoincrement=True)
-    test_type = Column(String(500))
+    test_type = Column(String(500), unique=True)
     description = Column(String(500), default=None)
 
 class Files(Base):

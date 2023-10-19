@@ -19,7 +19,7 @@ async def get_test_types(
         service: TestTypeService = Depends(get_test_type_service),
         user: User = Depends(get_current_user),
 ):
-    """Просмотр испытаний"""
+    """Просмотр типа испытаний"""
     return await service.get_test_types(limit=limit, offset=offset)
 
 @router.post("/")
@@ -28,7 +28,7 @@ async def create_test_type(
         service: TestTypeService = Depends(get_test_type_service),
         user: User = Depends(get_current_user),
 ):
-    """Создание испытания"""
+    """Создание типа испытания"""
     return await service.create(test_type_data=data)
 
 @router.put("/")
@@ -38,7 +38,7 @@ async def update_test_type(
         service: TestTypeService = Depends(get_test_type_service),
         user: User = Depends(get_current_user),
 ):
-    """Обновление испытания"""
+    """Обновление типа испытания"""
     return await service.update(test_type_id=test_type_id, test_type_data=data)
 
 @router.delete('/', status_code=status.HTTP_204_NO_CONTENT)
@@ -47,6 +47,6 @@ async def delete_test_type(
         service: TestTypeService = Depends(get_test_type_service),
         user: User = Depends(get_current_user),
 ):
-    """Удаление испытания"""
+    """Удаление типа испытания"""
     await service.delete(test_type_id=test_type_id)
     return Response(status_code=status.HTTP_204_NO_CONTENT)

@@ -10,3 +10,8 @@ exception_not_found = HTTPException(
     status_code=status.HTTP_404_NOT_FOUND,
     detail="Not found",
 )
+
+exception_not_unique = HTTPException(
+    status_code=status.HTTP_409_CONFLICT,
+    detail="Not unique",
+)

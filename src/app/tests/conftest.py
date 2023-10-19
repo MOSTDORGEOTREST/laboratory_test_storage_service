@@ -72,6 +72,20 @@ def test_wrong_samples():
          "laboratory_number": "11-1", "soil_type": "\u0421\u0443\u0433\u043b\u0438\u043d\u043e\u043a"},
     ]
 
+
+@pytest.fixture(scope="session")
+def test_test_types():
+    return [
+        {
+            "test_type": "сyclic",
+            "description": "Динамическое разжижение грунтов",
+        },
+        {
+            "test_type": "resonant",
+            "description": "Резонансная колонка",
+        },
+    ]
+
 @pytest.fixture(scope="session")
 def test_wrong_test():
     return {
@@ -91,58 +105,39 @@ def test_wrong_test():
     }
 
 @pytest.fixture(scope="session")
-def test_test():
-    return {
-        "sample_id": "wVPddOIxR3Atks9Uk47wuzZ33zwj0HS8",
-        "test_type_id": 1,
-        "timestamp": datetime.datetime.now(),
-        "test_params": {
-            "sigma_3": 100,
-            "sigma_1": 200,
-            "amplitude": 10,
-            "frequency": 0.2,
+def test_tests():
+    return [
+        {
+            "sample_id": "wVPddOIxR3Atks9Uk47wuzZ33zwj0HS8",
+            "test_type_id": 1,
+            "timestamp": datetime.datetime.now(),
+            "test_params": {
+                "sigma_3": 100,
+                "sigma_1": 200,
+                "amplitude": 10,
+                "frequency": 0.2,
+            },
+            "test_results": {
+                "max_ppr": 0.5,
+                "max_strain": 0.034
+            },
         },
-        "test_results": {
-            "max_ppr": 0.98,
-            "max_strain": 0.051
+        {
+            "sample_id": "wVPddOIxR3Atks9Uk47wuzZ33zwj0HS8",
+            "test_type_id": 1,
+            "timestamp": datetime.datetime.now(),
+            "test_params": {
+                "sigma_3": 150,
+                "sigma_1": 200,
+                "amplitude": 15,
+                "frequency": 0.2,
+            },
+            "test_results": {
+                "max_ppr": 0.98,
+                "max_strain": 0.051
+            },
         },
-    }
-
-@pytest.fixture(scope="session")
-def test_test():
-    return {
-        "sample_id": "wVPddOIxR3Atks9Uk47wuzZ33zwj0HS8",
-        "test_type_id": 1,
-        "timestamp": datetime.datetime.now(),
-        "test_params": {
-            "sigma_3": 100,
-            "sigma_1": 200,
-            "amplitude": 10,
-            "frequency": 0.2,
-        },
-        "test_results": {
-            "max_ppr": 0.98,
-            "max_strain": 0.051
-        },
-    }
-
-@pytest.fixture(scope="session")
-def test_test():
-    return {
-        "sample_id": "wVPddOIxR3Atks9Uk47wuzZ33zwj0HS8",
-        "test_type_id": 1,
-        "timestamp": datetime.datetime.now(),
-        "test_params": {
-            "sigma_3": 100,
-            "sigma_1": 200,
-            "amplitude": 10,
-            "frequency": 0.2,
-        },
-        "test_results": {
-            "max_ppr": 0.98,
-            "max_strain": 0.051
-        },
-    }
+    ]
 
 @pytest.fixture(scope='session')
 def event_loop(request):
