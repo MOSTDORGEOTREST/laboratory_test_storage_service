@@ -68,7 +68,7 @@ class Files(Base):
 
     file_id = Column(BigInteger, primary_key=True, autoincrement=True)
     test_id = Column(BigInteger, ForeignKey('tests.test_id'), index=True)
-    upload = Column(DateTime(timezone=True), server_default=func.now())
+    upload = Column(DateTime, server_default=func.now())
     key = Column(String(500))
     description = Column(String(500), default=None)
 

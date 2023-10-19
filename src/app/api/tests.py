@@ -1,12 +1,15 @@
-from fastapi import APIRouter, Depends, Response, status, HTTPException
-from fastapi.responses import JSONResponse
+from fastapi import APIRouter, Depends, Response, status, UploadFile
 from typing import List, Optional
 
 from models.test import TestUpdate, TestCreate, TestFullView
+from models.file import File
 from models.user import User
 from services.auth_service import get_current_user
 from services.test_service import TestService
-from services.depends import get_test_service
+from services.depends import get_test_service, get_file_service, get_s3_service
+from services.s3 import S3Service
+from services.file_service import FileService
+from config import configs
 
 router = APIRouter(
     prefix="/tests",
@@ -60,4 +63,63 @@ async def delete_test(
 ):
     """Удаление испытания"""
     await service.delete(test_id=test_id)
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
+
+@router.get("/files/", response_model=Optional[List[File]])
+async def get_files(
+        test_id: int,
+        service: FileService = Depends(get_file_service),
+        user: User = Depends(get_current_user),
+):
+    """Просмотр отчетов по объекту"""
+    return await service.get_test_files(test_id=test_id)
+
+@router.post("/files/")
+async def upload_file(
+        test_id: int,
+        file: UploadFile,
+        service: FileService = Depends(get_file_service),
+        s3_service: S3Service = Depends(get_s3_service),
+        user: User = Depends(get_current_user),
+):
+    """Добавление файла"""
+    contents = await file.read()
+
+    filename = file.filename.replace(' ', '_')
+
+    resp = await s3_service.upload(data=contents, key=f"{configs.s3_pre_key}{test_id}-{filename}")
+
+    return await service.create_file(test_id=test_id, filename=filename)
+
+@router.delete('/files/', status_code=status.HTTP_204_NO_CONTENT)
+async def delete_files(
+        test_id: int,
+        service: FileService = Depends(get_file_service),
+        s3_service: S3Service = Depends(get_s3_service),
+        user: User = Depends(get_current_user),
+):
+    """Удаление всех файлов"""
+    files = await service.get_test_files(test_id)
+
+    for file in files:
+        await s3_service.delete(file.key)
+
+    await service.delete_files(test_id)
+
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
+
+@router.delete('/files/{file_id}', status_code=status.HTTP_204_NO_CONTENT)
+async def delete_file(
+        file_id: int,
+        service: FileService = Depends(get_file_service),
+        s3_service: S3Service = Depends(get_s3_service),
+        user: User = Depends(get_current_user),
+):
+    """Удаление одного файла"""
+    file = await service.get_file(file_id)
+
+    await s3_service.delete(file.key)
+
+    await service.delete_file(file_id)
+
     return Response(status_code=status.HTTP_204_NO_CONTENT)

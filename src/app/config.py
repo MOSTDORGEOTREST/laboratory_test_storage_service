@@ -18,5 +18,12 @@ class Configs:
     jwt_secret: str = os.environ.get('JWT_SECRET')
     jwt_algorithm: str = os.environ.get('JWT_ALGORITHM')
     jwt_expiration: int = os.environ.get('JWT_EXPIRATION')
+    s3_pre_key: str = os.environ.get('S3_PRE_KEY')
+    endpoint_url: str = os.environ.get('AWS_URI')
+    aws_access_key_id: str = os.environ.get('AWS_ACCCESS_KEY')
+    service_name: str = os.environ.get('AWS_SERVICE_NAME')
+    aws_secret_access_key: str = os.environ.get('AWS_SECRET_KEY')
+    region_name: str = os.environ.get('AWS_REGION')
+    bucket: str = os.environ.get('AWS_BUCKET')
 
 configs = Configs()
