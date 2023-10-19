@@ -14,7 +14,7 @@ async def test_create(ac: AsyncClient, test_tests, test_wrong_test):
     )
     assert response.status_code == 404
 
-async def test_type_update(ac: AsyncClient, test_tests):
+async def test_update(ac: AsyncClient, test_tests):
     response = await ac.put(
         "/tests/?test_id=1",
         json=test_tests[2]
