@@ -14,6 +14,18 @@ class TestTypeService:
     def __init__(self, session: Session):
         self.session = session
 
+    async def get_test_test_type_by_name(self, test_type: str) -> Optional[tables.TestTypes]:
+        test_type = await self.session.execute(
+            select(tables.TestTypes).
+            filter_by(test_type=test_type)
+        )
+        test_type = test_type.scalars().first()
+
+        if not test_type:
+            raise exception_not_found
+        else:
+            return test_type
+
     async def _test_test_type_unique(self, test_type: str) -> Optional[tables.TestTypes]:
         test_type = await self.session.execute(
             select(tables.TestTypes).

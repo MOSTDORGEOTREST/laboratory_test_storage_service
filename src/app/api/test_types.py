@@ -22,6 +22,15 @@ async def get_test_types(
     """Просмотр типа испытаний"""
     return await service.get_test_types(limit=limit, offset=offset)
 
+@router.get("/{test_type}", response_model=TestType)
+async def get_test_type(
+        test_type: str,
+        service: TestTypeService = Depends(get_test_type_service),
+        user: User = Depends(get_current_user),
+):
+    """Просмотр типа испытаний"""
+    return await service.get_test_test_type_by_name(test_type)
+
 @router.post("/")
 async def create_test_type(
         data: TestTypeCreate,

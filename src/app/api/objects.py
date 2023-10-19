@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, Response, status, HTTPException
 from fastapi.responses import JSONResponse
-from typing import List
+from typing import List, Optional
 
 from models.object import Object
 from models.borehole import Borehole
@@ -22,6 +22,15 @@ async def get_objects(
     """Просмотр всех объектов"""
     return await service.get_objects()
 
+@router.get("/objects/{object_number}", response_model=Object)
+async def get_object(
+        object_number: str,
+        service: ObjectService = Depends(get_object_service),
+        user: User = Depends(get_current_user),
+):
+    """Просмотр всех объектов"""
+    return await service.get_object_by_number(object_number)
+
 @router.get("/boreholes", response_model=List[Borehole])
 async def get_boreholes(
         object_id: str,
@@ -31,6 +40,16 @@ async def get_boreholes(
     """Просмотр всех скважин по объекту"""
     return await service.get_boreholes(object_id=object_id)
 
+@router.get("/boreholes/{object_number}/{borehole_name}", response_model=Borehole)
+async def get_borehole(
+        object_number: str,
+        borehole_name: str,
+        service: ObjectService = Depends(get_object_service),
+        user: User = Depends(get_current_user),
+):
+    """Просмотр всех скважин по объекту"""
+    return await service.get_borehole_by_name(object_number=object_number, borehole_name=borehole_name)
+
 @router.get("/samples", response_model=List[Sample])
 async def get_samples(
         borehole_id: str,
@@ -39,6 +58,21 @@ async def get_samples(
 ):
     """Просмотр всех проб по скважине"""
     return await service.get_samples(borehole_id=borehole_id)
+
+@router.get("/samples/{object_number}/{borehole_name}/{laboratory_number}", response_model=Sample)
+async def get_sample(
+        object_number: str,
+        borehole_name: str,
+        laboratory_number: str,
+        service: ObjectService = Depends(get_object_service),
+        user: User = Depends(get_current_user),
+):
+    """Просмотр всех проб по скважине"""
+    return await service.get_sample_by_laboratory_number(
+        object_number=object_number,
+        borehole_name=borehole_name,
+        laboratory_number=laboratory_number
+    )
 
 @router.post("/objects")
 async def create_object(

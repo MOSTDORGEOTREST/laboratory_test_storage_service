@@ -39,11 +39,22 @@ class ObjectService:
             raise exception_not_found
         return borehole
 
+    async def get_object_by_number(self, object_number: str) -> Optional[tables.Objects]:
+        object = await self.session.execute(
+            select(tables.Objects).
+            filter_by(object_number=object_number)
+        )
+        object = object.scalars().first()
+
+        if not object:
+            raise exception_not_found
+        return object
+
     async def get_objects(self) -> Optional[List[tables.Objects]]:
         objects = await self.session.execute(
             select(tables.Objects)
         )
-        objects = objects.scalars().all()
+        objects = objects.scalars().first()
 
         if not objects:
             raise exception_not_found
@@ -60,6 +71,19 @@ class ObjectService:
             raise exception_not_found
         return boreholes
 
+    async def get_borehole_by_name(self, object_number: str, borehole_name: str) -> Optional[tables.Boreholes]:
+        object = await self.get_object_by_number(object_number)
+
+        borehole = await self.session.execute(
+            select(tables.Boreholes).
+            filter_by(object_id=object.object_id, borehole_name=borehole_name)
+        )
+        boreholes = borehole.scalars().first()
+
+        if not borehole:
+            raise exception_not_found
+        return boreholes
+
     async def get_samples(self, borehole_id: str) -> Optional[List[tables.Samples]]:
         samples = await self.session.execute(
             select(tables.Samples).
@@ -70,6 +94,21 @@ class ObjectService:
         if not samples:
             raise exception_not_found
         return samples
+
+    async def get_sample_by_laboratory_number(self, object_number: str, borehole_name: str, laboratory_number: str) -> Optional[tables.Samples]:
+        object = await self.get_object_by_number(object_number)
+
+        borehole = await self.get_borehole_by_name(object_number=object_number, borehole_name=borehole_name)
+
+        sample = await self.session.execute(
+            select(tables.Samples).
+            filter_by(borehole_id=borehole.borehole_id, laboratory_number=laboratory_number)
+        )
+        sample = sample.scalars().first()
+
+        if not sample:
+            raise exception_not_found
+        return sample
 
     async def create_object(self, data: Object) -> JSONResponse:
         try:
