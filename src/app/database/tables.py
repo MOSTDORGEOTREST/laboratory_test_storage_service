@@ -8,7 +8,7 @@ from sqlalchemy import (
     DateTime,
     Index
 )
-from geoalchemy2 import Geometry
+from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship
 from database.database import Base
@@ -49,9 +49,9 @@ class Tests(Base):
     test_id = Column(BigInteger, primary_key=True, autoincrement=True)
     sample_id = Column(String(32), ForeignKey('samples.sample_id'), index=True)
     test_type_id = Column(Integer, ForeignKey('test_types.test_type_id'), index=True)
-    timestamp = Column(DateTime(timezone=True), server_default=func.now())
-    test_params = Column(JSON, nullable=True, default=None)
-    test_results = Column(JSON, nullable=True, default=None)
+    timestamp = Column(DateTime, server_default=func.now())
+    test_params = Column(JSONB, nullable=True, default=None)
+    test_results = Column(JSONB, nullable=True, default=None)
     description = Column(String(500), default=None)
 
     files = relationship("Files")

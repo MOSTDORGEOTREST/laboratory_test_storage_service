@@ -1,4 +1,4 @@
-import datetime
+from datetime import datetime
 
 import pytest
 from httpx import AsyncClient
@@ -84,6 +84,10 @@ def test_test_types():
             "test_type": "resonant",
             "description": "Резонансная колонка",
         },
+        {
+            "test_type": "vibration",
+            "description": "Виброползучесть",
+        },
     ]
 
 @pytest.fixture(scope="session")
@@ -91,7 +95,7 @@ def test_wrong_test():
     return {
         "sample_id": "xxx",
         "test_type_id": 790,
-        "timestamp": datetime.datetime.now(),
+        "timestamp": datetime(2023, 10, 1, 0, 0).strftime("%Y-%m-%d %H:%M:%S"),
         "test_params": {
             "sigma_3": 100,
             "sigma_1": 200,
@@ -110,7 +114,7 @@ def test_tests():
         {
             "sample_id": "wVPddOIxR3Atks9Uk47wuzZ33zwj0HS8",
             "test_type_id": 1,
-            "timestamp": datetime.datetime.now(),
+            "timestamp": datetime(2023, 10, 1, 0, 0).strftime("%Y-%m-%d %H:%M:%S"),
             "test_params": {
                 "sigma_3": 100,
                 "sigma_1": 200,
@@ -125,7 +129,7 @@ def test_tests():
         {
             "sample_id": "wVPddOIxR3Atks9Uk47wuzZ33zwj0HS8",
             "test_type_id": 1,
-            "timestamp": datetime.datetime.now(),
+            "timestamp": datetime(2023, 10, 1, 0, 0).strftime("%Y-%m-%d %H:%M:%S"),
             "test_params": {
                 "sigma_3": 150,
                 "sigma_1": 200,
@@ -135,6 +139,21 @@ def test_tests():
             "test_results": {
                 "max_ppr": 0.98,
                 "max_strain": 0.051
+            },
+        },
+        {
+            "sample_id": "wVPddOIxR3Atks9Uk47wuzZ33zwj0HS8",
+            "test_type_id": 3,
+            "timestamp": datetime(2023, 10, 1, 0, 0).strftime("%Y-%m-%d %H:%M:%S"),
+            "test_params": {
+                "sigma_3": 200,
+                "sigma_1": 200,
+                "amplitude": 5,
+                "frequency": 0.2,
+            },
+            "test_results": {
+                "max_ppr": 0.58,
+                "max_strain": 0.015
             },
         },
     ]

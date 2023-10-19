@@ -12,7 +12,7 @@ router = APIRouter(
     prefix="/tests",
     tags=['tests'])
 
-@router.get("/")#, response_model=List[TestFullView])
+@router.get("/", response_model=List[TestFullView])
 async def get_tests(
         object_number: Optional[str] = None,
         borehole_name: Optional[str] = None,

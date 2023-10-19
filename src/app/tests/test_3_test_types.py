@@ -23,11 +23,11 @@ async def test_type_update(ac: AsyncClient, test_test_types):
 
 async def test_del_test_type(ac: AsyncClient):
     response = await ac.delete(
-        f"/test_types/?test_type_id=1",
+        f"/test_types/?test_type_id=2",
     )
     assert response.status_code == 204
 
     response = await ac.get(
         f"/test_types/?limit=500&offset=0",
     )
-    assert 1  not in [response.json()[i]["test_type_id"] for i in range(len(response.json()))]
+    assert 2 not in [response.json()[i]["test_type_id"] for i in range(len(response.json()))]

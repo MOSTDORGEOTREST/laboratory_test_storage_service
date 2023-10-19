@@ -9,8 +9,6 @@ from exeptions import exception_not_found
 import database.tables as tables
 
 from models.test import Test, TestUpdate, TestCreate, TestFullView
-from models.borehole import Borehole
-from models.sample import Sample
 
 class TestService:
     def __init__(self, session: Session):
@@ -76,7 +74,23 @@ class TestService:
             filters.append(tables.TestTypes.test_type == test_type)
 
         tests = await self.session.execute(
-            select(tables.Tests).
+            select(
+                tables.Tests.test_id,
+                tables.Objects.object_number,
+                tables.Boreholes.borehole_name,
+                tables.Samples.laboratory_number,
+                tables.Samples.soil_type,
+                tables.TestTypes.test_type,
+                tables.Tests.timestamp,
+                tables.Tests.test_params,
+                tables.Tests.test_results,
+                tables.Tests.description
+            ).
+            join(
+                tables.TestTypes,
+                tables.TestTypes.test_type_id == tables.Tests.test_type_id,
+                isouter=True
+            ).
             join(
                 tables.Samples,
                 tables.Samples.sample_id == tables.Tests.sample_id,
@@ -96,19 +110,39 @@ class TestService:
             offset(offset).
             limit(limit)
         )
-        tests = tests.scalars().all()
+
+        tests = tests.fetchall()
 
         if not tests:
             raise exception_not_found
-        return tests
+
+        res = []
+        for test in tests:
+            res.append(
+                TestFullView(
+                    test_id=test[0],
+                    object_number=test[1],
+                    borehole_name=test[2],
+                    laboratory_number=test[3],
+                    soil_type=test[4],
+                    test_type=test[5],
+                    timestamp=test[6],
+                    test_params=test[7],
+                    test_results=test[8],
+                    description=test[9],
+                )
+            )
+
+        return res
 
     async def create(self, test_data: TestCreate) -> tables.Tests:
-        await self._get_sample(TestCreate.sample_id)
+        await self._get_sample(test_data.sample_id)
+        await self._get_test_type(test_data.test_type_id)
 
         stmt = insert(
             tables.Tests
         ).returning(
-            tables.Tests
+            tables.Tests.test_id
         ).values(
             **test_data.dict()
         )
@@ -117,29 +151,31 @@ class TestService:
             index_elements=['test_id'],
             set_=stmt.excluded
         )
-        test = await self.session.execute(stmt)
+        id = await self.session.execute(stmt)
         await self.session.commit()
 
-        return test
+        return Test(test_id=id.first()[0], **test_data.dict())
 
     async def update(self, test_id: int, test_data: TestUpdate) -> tables.Tests:
+        await self._get_sample(test_data.sample_id)
+        await self._get_test_type(test_data.test_type_id)
         await self._get_test(test_id)
 
         q = update(
             tables.Tests
         ).returning(
-            tables.Tests
+            tables.Tests.test_id
         ).where(
             tables.Tests.test_id == test_id
         ).values(
-            *test_data.dict()
+            **test_data.dict()
         )
 
         q.execution_options(synchronize_session="fetch")
-        test = await self.session.execute(q)
+        id = await self.session.execute(q)
         await self.session.commit()
 
-        return test
+        return Test(test_id=id.first()[0], **test_data.dict())
 
     async def delete(self, test_id: int):
         q = delete(

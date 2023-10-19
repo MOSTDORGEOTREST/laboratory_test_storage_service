@@ -39,3 +39,7 @@ class TestUpdate(TestBase):
     test_params: Optional[dict] = None
     test_results: Optional[dict] = None
     description: Optional[str] = None
+
+    def to_dict(self):
+        self_dict = self.dict()
+        return {key: self_dict[key] for key in self_dict if self_dict[key]}
