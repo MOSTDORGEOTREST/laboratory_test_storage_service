@@ -7,6 +7,13 @@ import asyncio
 
 from main import app
 from main import configs
+from app import engine, Base
+
+@pytest.fixture(scope="session", autouse=True)
+async def setup_db():
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.drop_all)
+        await conn.run_sync(Base.metadata.create_all)
 
 @pytest.fixture(scope="session")
 def user():

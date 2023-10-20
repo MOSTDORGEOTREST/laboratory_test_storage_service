@@ -144,7 +144,7 @@ class TestService:
         ).returning(
             tables.Tests.test_id
         ).values(
-            **test_data.dict()
+            **test_data.model_dump()
         )
 
         stmt = stmt.on_conflict_do_update(
@@ -154,7 +154,7 @@ class TestService:
         id = await self.session.execute(stmt)
         await self.session.commit()
 
-        return Test(test_id=id.first()[0], **test_data.dict())
+        return Test(test_id=id.first()[0], **test_data.model_dump())
 
     async def update(self, test_id: int, test_data: TestUpdate) -> tables.Tests:
         await self._get_sample(test_data.sample_id)
@@ -168,14 +168,14 @@ class TestService:
         ).where(
             tables.Tests.test_id == test_id
         ).values(
-            **test_data.dict()
+            **test_data.model_dump()
         )
 
         q.execution_options(synchronize_session="fetch")
         id = await self.session.execute(q)
         await self.session.commit()
 
-        return Test(test_id=id.first()[0], **test_data.dict())
+        return Test(test_id=id.first()[0], **test_data.model_dump())
 
     async def delete(self, test_id: int):
         q = delete(

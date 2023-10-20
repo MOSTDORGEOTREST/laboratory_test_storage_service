@@ -114,7 +114,7 @@ class ObjectService:
         try:
             # Создание объекта
             stmt_object = insert(tables.Objects).values(
-                **data.dict()
+                **data.model_dump()
             )
 
             stmt_object = stmt_object.on_conflict_do_update(
@@ -149,7 +149,7 @@ class ObjectService:
                     raise Exception(f'Object {borehole.object_id} does not exist')
 
                 stmt_borehole = insert(tables.Boreholes).values(
-                    **borehole.dict()
+                    **borehole.model_dump()
                 )
 
                 stmt_borehole = stmt_borehole.on_conflict_do_update(
@@ -184,7 +184,7 @@ class ObjectService:
                     raise Exception(f'Borehole {sample.borehole_id} does not exist')
 
                 stmt_sample = insert(tables.Samples).values(
-                    **sample.dict()
+                    **sample.model_dump()
                 )
 
                 stmt_sample = stmt_sample.on_conflict_do_update(

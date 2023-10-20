@@ -68,7 +68,7 @@ class TestTypeService:
         stmt = insert(
             tables.TestTypes
         ).values(
-            **test_type_data.dict()
+            **test_type_data.model_dump()
         )
 
         stmt = stmt.on_conflict_do_update(
@@ -88,14 +88,14 @@ class TestTypeService:
         ).where(
             tables.TestTypes.test_type_id == test_type_id
         ).values(
-            **test_type_data.dict()
+            **test_type_data.model_dump()
         )
 
         q.execution_options(synchronize_session="fetch")
         test_type = await self.session.execute(q)
         await self.session.commit()
 
-        return TestType(test_type_id=test_type_id, **test_type_data.dict())
+        return TestType(test_type_id=test_type_id, **test_type_data.model_dump())
 
     async def delete(self, test_type_id: int):
         q = delete(
