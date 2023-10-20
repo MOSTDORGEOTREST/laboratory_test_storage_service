@@ -1,6 +1,6 @@
-from fastapi import APIRouter, Depends, Response, status, HTTPException
-from fastapi.responses import JSONResponse
+from fastapi import APIRouter, Depends, Response, status
 from typing import List, Optional
+from fastapi_cache.decorator import cache
 
 from models.test_type import TestTypeCreate, TestType, TestTypeUpdate
 from models.user import User
@@ -13,6 +13,7 @@ router = APIRouter(
     tags=['test_types'])
 
 @router.get("/", response_model=List[TestType])
+@cache(expire=60)
 async def get_test_types(
         limit: Optional[int] = 500,
         offset: Optional[int] = 0,
@@ -23,6 +24,7 @@ async def get_test_types(
     return await service.get_test_types(limit=limit, offset=offset)
 
 @router.get("/{test_type}", response_model=TestType)
+@cache(expire=60)
 async def get_test_type(
         test_type: str,
         service: TestTypeService = Depends(get_test_type_service),

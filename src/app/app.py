@@ -4,6 +4,9 @@ from fastapi.responses import (
     HTMLResponse,
     JSONResponse
 )
+from fastapi_cache import FastAPICache
+from fastapi_cache.backends.redis import RedisBackend
+from redis import asyncio as aioredis
 
 from config import configs
 from database.database import (
@@ -48,8 +51,14 @@ async def index():
 
 @app.on_event("startup")
 async def startup_event():
+    redis = aioredis.from_url(
+        f"redis://{configs.redis_host}:{configs.redis_port}",
+        username=configs.redis_user, password=configs.redis_password,
+        encoding="utf8", decode_responses=True)
+    FastAPICache.init(RedisBackend(redis), prefix="fastapi-cache")
+
     async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.drop_all)
+        #await conn.run_sync(Base.metadata.drop_all)
         await conn.run_sync(Base.metadata.create_all)
 
 

@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends, Response, status, UploadFile
 from typing import List, Optional
+from fastapi_cache.decorator import cache
 
 from models.test import TestUpdate, TestCreate, TestFullView
 from models.file import File
@@ -16,6 +17,7 @@ router = APIRouter(
     tags=['tests'])
 
 @router.get("/", response_model=List[TestFullView])
+@cache(expire=60)
 async def get_tests(
         object_number: Optional[str] = None,
         borehole_name: Optional[str] = None,
@@ -87,7 +89,9 @@ async def upload_file(
 
     filename = file.filename.replace(' ', '_')
 
-    resp = await s3_service.upload(data=contents, key=f"{configs.s3_pre_key}{test_id}-{filename}")
+    await service._get_test(test_id)
+
+    resp = await s3_service.upload(data=contents, key=f"{configs.s3_pre_key}{test_id}/{filename}")
 
     return await service.create_file(test_id=test_id, filename=filename)
 

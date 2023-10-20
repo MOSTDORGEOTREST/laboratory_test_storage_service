@@ -25,5 +25,9 @@ class Configs:
     aws_secret_access_key: str = os.environ.get('AWS_SECRET_KEY')
     region_name: str = os.environ.get('AWS_REGION')
     bucket: str = os.environ.get('AWS_BUCKET')
+    redis_host: str = os.environ.get('REDIS_HOST')
+    redis_port: str = os.environ.get('REDIS_PORT')
+    redis_user: str = os.environ.get('REDIS_USER')
+    redis_password: str = os.environ.get('REDIS_PASSWORD')
 
 configs = Configs()

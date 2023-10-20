@@ -1,6 +1,6 @@
-from fastapi import APIRouter, Depends, Response, status, HTTPException
-from fastapi.responses import JSONResponse
-from typing import List, Optional
+from fastapi import APIRouter, Depends, Response, status
+from typing import List
+from fastapi_cache.decorator import cache
 
 from models.object import Object
 from models.borehole import Borehole
@@ -15,6 +15,7 @@ router = APIRouter(
     tags=['objects'])
 
 @router.get("/objects", response_model=List[Object])
+@cache(expire=60)
 async def get_objects(
         service: ObjectService = Depends(get_object_service),
         user: User = Depends(get_current_user),
@@ -23,6 +24,7 @@ async def get_objects(
     return await service.get_objects()
 
 @router.get("/objects/{object_number}", response_model=Object)
+@cache(expire=60)
 async def get_object(
         object_number: str,
         service: ObjectService = Depends(get_object_service),
@@ -32,6 +34,7 @@ async def get_object(
     return await service.get_object_by_number(object_number)
 
 @router.get("/boreholes", response_model=List[Borehole])
+@cache(expire=60)
 async def get_boreholes(
         object_id: str,
         service: ObjectService = Depends(get_object_service),
@@ -41,6 +44,7 @@ async def get_boreholes(
     return await service.get_boreholes(object_id=object_id)
 
 @router.get("/boreholes/{object_number}/{borehole_name}", response_model=Borehole)
+@cache(expire=60)
 async def get_borehole(
         object_number: str,
         borehole_name: str,
@@ -51,6 +55,7 @@ async def get_borehole(
     return await service.get_borehole_by_name(object_number=object_number, borehole_name=borehole_name)
 
 @router.get("/samples", response_model=List[Sample])
+@cache(expire=60)
 async def get_samples(
         borehole_id: str,
         service: ObjectService = Depends(get_object_service),
@@ -60,6 +65,7 @@ async def get_samples(
     return await service.get_samples(borehole_id=borehole_id)
 
 @router.get("/samples/{object_number}/{borehole_name}/{laboratory_number}", response_model=Sample)
+@cache(expire=60)
 async def get_sample(
         object_number: str,
         borehole_name: str,
