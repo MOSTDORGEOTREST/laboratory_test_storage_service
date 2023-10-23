@@ -38,8 +38,12 @@
     AWS_BUCKET=...
     REDIS_PORT=...
     S3_PRE_KEY=...
+    REDIS_HOST=...
+    REDIS_PORT=...
+    REDIS_USER=...
+    REDIS_PASSWORD=...
 
-## Деплой:
+## Для разработки::
 ~/ = папка проекта 
 
 1. Скопировать файл .env в ~/
@@ -49,7 +53,10 @@
     `git clone https://github.com/MOSTDORGEOTREST/laboratory_test_storage_service.git`
 
 3. Запуск через docker-compose:\
-    `docker-compose up --force-recreate -d --build`
+    `docker-compose -f docker-compose-dev.yml up`
+
+4. Запуск тестов:\
+    `docker-compose exec web pytest . -v`
 
 
 Для очищения докера от проекта:\
