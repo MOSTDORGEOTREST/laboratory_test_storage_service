@@ -1,9 +1,14 @@
-from fastapi import APIRouter, Depends, status, Response
+from fastapi import (
+    APIRouter, Depends)
 from fastapi.security import OAuth2PasswordRequestForm
 from fastapi.responses import JSONResponse
 
-from models.user import Token, User
-from services.auth_service import AuthService, get_current_user
+from models.user import (
+    Token,
+    User)
+from services.auth_service import (
+    AuthService,
+    get_current_user)
 from services.depends import get_auth_service
 
 router = APIRouter(

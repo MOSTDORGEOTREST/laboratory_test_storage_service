@@ -1,4 +1,6 @@
-from pydantic import BaseModel, Field
+from pydantic import (
+    BaseModel,
+    Field)
 
 class BaseUser(BaseModel):
     username: str

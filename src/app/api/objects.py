@@ -1,4 +1,8 @@
-from fastapi import APIRouter, Depends, Response, status
+from fastapi import (
+    APIRouter,
+    Depends,
+    Response,
+    status)
 from typing import List
 from fastapi_cache.decorator import cache
 

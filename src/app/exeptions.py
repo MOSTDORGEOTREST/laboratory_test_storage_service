@@ -15,3 +15,8 @@ exception_not_unique = HTTPException(
     status_code=status.HTTP_409_CONFLICT,
     detail="Not unique",
 )
+
+exception_data_structure = HTTPException(
+    status_code=status.HTTP_409_CONFLICT,
+    detail="Data structure exception",
+)

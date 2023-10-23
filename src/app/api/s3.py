@@ -1,4 +1,6 @@
-from fastapi import APIRouter, Depends
+from fastapi import (
+    APIRouter,
+    Depends)
 from fastapi.responses import StreamingResponse
 
 from services.depends import get_s3_service

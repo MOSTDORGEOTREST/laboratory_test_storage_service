@@ -1,8 +1,17 @@
-from fastapi import APIRouter, Depends, Response, status
-from typing import List, Optional
+from fastapi import (
+    APIRouter,
+    Depends,
+    Response,
+    status)
+from typing import (
+    List,
+    Optional)
 from fastapi_cache.decorator import cache
 
-from models.test_type import TestTypeCreate, TestType, TestTypeUpdate
+from models.test_type import (
+    TestTypeCreate,
+    TestType,
+    TestTypeUpdate)
 from models.user import User
 from services.auth_service import get_current_user
 from services.test_type import TestTypeService
@@ -31,7 +40,7 @@ async def get_test_type(
         user: User = Depends(get_current_user),
 ):
     """Просмотр типа испытаний"""
-    return await service.get_test_test_type_by_name(test_type)
+    return await service.get_test_type_by_name(test_type)
 
 @router.post("/")
 async def create_test_type(

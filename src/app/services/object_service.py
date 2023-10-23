@@ -1,4 +1,6 @@
-from typing import Optional, List
+from typing import (
+    Optional,
+    List)
 from fastapi import status
 from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session

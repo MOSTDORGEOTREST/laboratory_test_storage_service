@@ -1,5 +1,9 @@
-from typing import Optional, List
-from fastapi import status, HTTPException
+from typing import (
+    Optional,
+    List)
+from fastapi import (
+    status,
+    HTTPException)
 from sqlalchemy.orm import Session
 from sqlalchemy.future import select
 from sqlalchemy import update, delete
@@ -8,7 +12,11 @@ from sqlalchemy.dialects.postgresql import insert
 from exeptions import exception_not_found
 import database.tables as tables
 
-from models.test import Test, TestUpdate, TestCreate, TestFullView
+from models.test import (
+    Test,
+    TestUpdate,
+    TestCreate,
+    TestFullView)
 
 class TestService:
     def __init__(self, session: Session):

@@ -1,4 +1,6 @@
-from fastapi import status, HTTPException
+from fastapi import (
+    status,
+    HTTPException)
 from typing import Optional, List
 from sqlalchemy.orm import Session
 from sqlalchemy.future import select

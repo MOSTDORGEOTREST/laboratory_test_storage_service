@@ -1,20 +1,27 @@
-from typing import Optional, List
-from fastapi import status, HTTPException
+from typing import (
+    Optional,
+    List)
 from sqlalchemy.orm import Session
 from sqlalchemy.future import select
 from sqlalchemy import update, delete
 from sqlalchemy.dialects.postgresql import insert
 
-from exeptions import exception_not_found, exception_not_unique
+from exeptions import (
+    exception_not_found,
+    exception_not_unique,
+    exception_data_structure)
 import database.tables as tables
 
-from models.test_type import TestType, TestTypeUpdate, TestTypeCreate
+from models.test_type import (
+    TestType,
+    TestTypeUpdate,
+    TestTypeCreate)
 
 class TestTypeService:
     def __init__(self, session: Session):
         self.session = session
 
-    async def get_test_test_type_by_name(self, test_type: str) -> Optional[tables.TestTypes]:
+    async def get_test_type_by_name(self, test_type: str) -> Optional[tables.TestTypes]:
         test_type = await self.session.execute(
             select(tables.TestTypes).
             filter_by(test_type=test_type)
@@ -26,7 +33,7 @@ class TestTypeService:
         else:
             return test_type
 
-    async def _test_test_type_unique(self, test_type: str) -> Optional[tables.TestTypes]:
+    async def _test_type_unique(self, test_type: str) -> Optional[tables.TestTypes]:
         test_type = await self.session.execute(
             select(tables.TestTypes).
             filter_by(test_type=test_type)
@@ -63,7 +70,7 @@ class TestTypeService:
         return test_types
 
     async def create(self, test_type_data: TestTypeCreate) -> TestTypeCreate:
-        await self._test_test_type_unique(test_type_data.test_type)
+        await self._test_type_unique(test_type_data.test_type)
 
         stmt = insert(
             tables.TestTypes
@@ -98,6 +105,15 @@ class TestTypeService:
         return TestType(test_type_id=test_type_id, **test_type_data.model_dump())
 
     async def delete(self, test_type_id: int):
+        tests = await self.session.execute(
+            select(tables.Tests).
+            filter_by(test_type_id=test_type_id)
+        )
+        test = tests.scalars().first()
+
+        if test:
+            raise exception_data_structure
+
         q = delete(
             tables.TestTypes
         ).where(

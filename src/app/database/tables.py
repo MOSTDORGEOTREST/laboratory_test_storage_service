@@ -1,7 +1,6 @@
 from sqlalchemy import (
     Column,
     String,
-    JSON,
     ForeignKey,
     BigInteger,
     Integer,
