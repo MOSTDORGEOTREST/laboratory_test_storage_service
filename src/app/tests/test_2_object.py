@@ -1,5 +1,4 @@
 from httpx import AsyncClient
-from main import configs
 
 async def test_create_wrong_boreholes(ac: AsyncClient, test_wrong_boreholes):
     response = await ac.post(

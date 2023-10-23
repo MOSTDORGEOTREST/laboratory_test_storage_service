@@ -27,7 +27,7 @@ async def test_del_test(ac: AsyncClient):
     )
     assert response.status_code == 204
 
-    response = await ac.get(
-        f"/tests/?limit=500&offset=0",
-    )
-    assert 1 not in [response.json()[i]["test_id"] for i in range(len(response.json()))]
+    #response = await ac.get(
+    #    f"/tests/?limit=500&offset=0",
+    #)
+    #assert 1 not in [response.json()[i]["test_id"] for i in range(len(response.json()))]

@@ -1,0 +1,41 @@
+version: '3.3'
+services:
+  web:
+    build: ./src
+    command: bash -c 'uvicorn main:app --host 0.0.0.0'
+    environment:
+      - MODE=prod
+      - DATABASE_URL=postgresql+asyncpg://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_NAME}
+      - JWT_SECRET=${JWT_SECRET}
+      - JWT_ALGORITHM=${JWT_ALGORITHM}
+      - JWT_EXPIRATION=${JWT_EXPIRATION}
+      - SUPERUSER_NAME=${SUPERUSER_NAME}
+      - SUPERUSER_PASSWORD=${SUPERUSER_PASSWORD}
+      - AWS_URI=${AWS_URI}
+      - AWS_ACCCESS_KEY=${AWS_ACCCESS_KEY}
+      - AWS_SERVICE_NAME=${AWS_SERVICE_NAME}
+      - AWS_SECRET_KEY=${AWS_SECRET_KEY}
+      - AWS_REGION=${AWS_REGION}
+      - AWS_BUCKET=${AWS_BUCKET}
+      - S3_PRE_KEY=${S3_PRE_KEY}
+      - REDIS_HOST=${REDIS_HOST}
+      - REDIS_PORT=${REDIS_PORT}
+      - REDIS_USER=${REDIS_USER}
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+    ports:
+      - 8000:8000
+    restart: always
+    volumes:
+      - /etc/timezone:/etc/timezone:ro
+      - /etc/localtime:/etc/localtime:ro
+
+  server:
+    restart: always
+    image: nginx
+    volumes:
+      - ./server/conf.d:/etc/nginx/conf.d
+    links:
+      - web:web
+    ports:
+      - "80:80"
+

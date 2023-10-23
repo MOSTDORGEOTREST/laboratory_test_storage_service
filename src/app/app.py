@@ -51,14 +51,22 @@ async def index():
 
 @app.on_event("startup")
 async def startup_event():
-    redis = aioredis.from_url(
-        f"redis://{configs.redis_host}:{configs.redis_port}",
-        username=configs.redis_user, password=configs.redis_password,
-        encoding="utf8", decode_responses=True)
+    if configs.mode == 'test':
+        redis = aioredis.from_url(
+            "redis://localhost:6379",
+            encoding="utf8", decode_responses=True)
+    else:
+        redis = aioredis.from_url(
+            f"redis://{configs.redis_host}:{configs.redis_port}",
+            username=configs.redis_user, password=configs.redis_password,
+            encoding="utf8", decode_responses=True)
+
     FastAPICache.init(RedisBackend(redis), prefix="fastapi-cache")
 
     async with engine.begin() as conn:
-        #await conn.run_sync(Base.metadata.drop_all)
+        if configs.mode == 'test':
+            await conn.run_sync(Base.metadata.drop_all)
+
         await conn.run_sync(Base.metadata.create_all)
 
 

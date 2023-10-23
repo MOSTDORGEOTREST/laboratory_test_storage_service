@@ -11,6 +11,7 @@ def get_self_public_ip():
     return conn.getresponse().read().decode()
 
 class Configs:
+    mode: str = os.environ.get('MODE')
     host_ip: str = get_self_public_ip()
     database_url: str = os.environ.get('DATABASE_URL')
     superuser_name: str = os.environ.get('SUPERUSER_NAME')

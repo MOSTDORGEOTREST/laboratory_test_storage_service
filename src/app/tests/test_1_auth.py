@@ -1,5 +1,5 @@
 from httpx import AsyncClient
-from main import configs
+from config import configs
 
 async def test_fake_auth(ac: AsyncClient, fake_user):
     response = await ac.post("/auth/sign-in/", data=fake_user)

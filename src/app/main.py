@@ -1,5 +1,4 @@
 import uvicorn
-from config import configs
 from app import app
 
 if __name__ == '__main__':
