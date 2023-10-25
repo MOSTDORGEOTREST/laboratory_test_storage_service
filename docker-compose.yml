@@ -29,11 +29,11 @@ services:
       - /etc/timezone:/etc/timezone:ro
       - /etc/localtime:/etc/localtime:ro
 
-  server:
+  webserver:
     restart: always
-    image: nginx
+    image: nginx:alpine
     volumes:
-      - ./server/conf.d:/etc/nginx/conf.d
+      - ./nginx/conf.d:/etc/nginx/conf.d
     links:
       - web:web
     ports:
