@@ -56,7 +56,7 @@ class ObjectService:
         objects = await self.session.execute(
             select(tables.Objects)
         )
-        objects = objects.scalars().first()
+        objects = objects.scalars().all()
 
         if not objects:
             raise exception_not_found
