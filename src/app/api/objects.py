@@ -3,7 +3,9 @@ from fastapi import (
     Depends,
     Response,
     status)
-from typing import List
+from typing import (
+    List,
+    Optional)
 from fastapi_cache.decorator import cache
 
 from models.object import Object
@@ -18,7 +20,7 @@ router = APIRouter(
     prefix="/objects",
     tags=['objects'])
 
-@router.get("/objects", response_model=List[Object])
+@router.get("/objects", response_model=Optional[List[Object]])
 @cache(expire=60)
 async def get_objects(
         service: ObjectService = Depends(get_object_service),
