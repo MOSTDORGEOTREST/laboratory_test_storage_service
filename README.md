@@ -43,16 +43,15 @@
     REDIS_USER=...
     REDIS_PASSWORD=...
 
-## Для разработки::
-~/ = папка проекта 
-
-1. Скопировать файл .env в ~/
+## Деплой:
  
-2. Открыть папку ~/ в терминале и выполнить:\
+1. Открыть папку /root/ в терминале и выполнить:\
     `git init`\
     `git clone https://github.com/MOSTDORGEOTREST/laboratory_test_storage_service.git`
 
-3. Запуск через docker-compose:\
+2. Скопировать файл .env в /root/laboratory_test_storage_service
+
+3. Запуск через скрипт:\
     `docker-compose -f docker-compose-dev.yml up`
 
 4. Запуск тестов:\
