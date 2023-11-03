@@ -1,0 +1,24 @@
+{% extends 'base.html' %} {% block header %} {% include 'header.html' %} {%
+endblock %} {% block content %}
+<div class="login-wrapper">
+  <div class="login">
+    <form action="" class="login-form" id="login-form">
+      <input
+        type="text"
+        autocomplete="username"
+        class="form-item"
+        placeholder="Имя пользователя"
+        id="username"
+      />
+      <input
+        type="password"
+        autocomplete="current-password"
+        class="form-item"
+        placeholder="Пароль"
+        id="password"
+      />
+      <button type="submit" class="form-submit">ВОЙТИ</button>
+    </form>
+  </div>
+</div>
+{% endblock %}
