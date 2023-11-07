@@ -32,7 +32,7 @@ class TestFullView(BaseModel):
 class TestCreate(TestBase):
     pass
 
-class TestUpdate(TestBase):
+class TestUpdate(BaseModel):
     sample_id: Optional[str] = None
     test_type_id: Optional[int] = None
     timestamp: Optional[datetime] = None

@@ -167,23 +167,32 @@ class TestService:
     async def update(self, test_id: int, test_data: TestUpdate) -> tables.Tests:
         await self._get_sample(test_data.sample_id)
         await self._get_test_type(test_data.test_type_id)
-        await self._get_test(test_id)
+        test = await self._get_test(test_id)
+
+        test_params = test.test_params
+        test_results = test.test_results
+        data = test_data.to_dict()
+
+        if data.get("test_params", None):
+            test_params.update(data["test_params"])
+            data["test_params"] = test_params
+        if data.get("test_results", None):
+            test_results.update(data["test_results"])
+            data["test_results"] = test_results
 
         q = update(
             tables.Tests
-        ).returning(
-            tables.Tests.test_id
         ).where(
             tables.Tests.test_id == test_id
         ).values(
-            **test_data.model_dump()
+            **data
         )
 
         q.execution_options(synchronize_session="fetch")
-        id = await self.session.execute(q)
+        await self.session.execute(q)
         await self.session.commit()
 
-        return Test(test_id=id.first()[0], **test_data.model_dump())
+        return test_data
 
     async def delete(self, test_id: int):
         q = delete(
