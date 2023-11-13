@@ -9,6 +9,7 @@ from typing import (List,
 from fastapi_cache.decorator import cache
 
 from models.test import (
+    Test,
     TestUpdate,
     TestCreate,
     TestFullView)
@@ -59,7 +60,7 @@ async def create_test(
     """Создание испытания"""
     return await service.create(test_data=data)
 
-@router.put("/")
+@router.put("/", response_model=TestUpdate)
 async def update_test(
         test_id: int,
         data: TestUpdate,
