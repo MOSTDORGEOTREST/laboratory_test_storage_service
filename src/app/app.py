@@ -1,6 +1,6 @@
 import os
 
-from fastapi import FastAPI, Request, HTTPException, status
+from fastapi import Depends, FastAPI, Request, HTTPException, status
 from starlette.middleware.cors import CORSMiddleware
 from fastapi.responses import (
     HTMLResponse,
@@ -8,6 +8,8 @@ from fastapi.responses import (
 )
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
+from services.depends import get_object_service
+from services.object_service import ObjectService
 from fastapi_cache import FastAPICache
 from fastapi_cache.backends.redis import RedisBackend
 from redis import asyncio as aioredis
@@ -58,12 +60,19 @@ app.mount("/static", StaticFiles(directory=st_abs_file_path), name="static")
 templates = Jinja2Templates(directory="templates")
 
 @app.get("/", response_class=HTMLResponse)
-async def index(request: Request):
+async def index(request: Request,
+                objects_service: ObjectService = Depends(get_object_service)):
     try:
         authorization: str = request.cookies.get("Authorization")
         scheme, token = get_authorization_scheme_param(authorization)
         if token:
-            return templates.TemplateResponse("personal.html", context={"request": request})
+            objects = await objects_service.get_objects()
+
+            print(objects)
+
+            return templates.TemplateResponse("personal.html",
+                                               context={"request": request,
+                                                        "objects": objects})
         else:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,

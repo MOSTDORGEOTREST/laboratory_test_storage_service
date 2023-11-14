@@ -4,15 +4,84 @@ endblock %} {% block content %}
 <div class="content-wrapper">
   <div class="content-block">
     <h3 class="block-title">Объекты</h3>
-    <table class="block-table"></table>
+    <div class="block-table">
+      <table>
+        <thead>
+          <tr>
+            <th scope="">Номер объекта</th>
+            <th scope="">Описание</th>
+            <th scope="">Идентификатор</th>
+          </tr>
+        </thead>
+      </table>
+      <div class="table-scroll-wrapper">
+        <table>
+          <tbody>
+            {% for item in objects %}
+            <tr>
+              <td class="table__td">{{ item["object_number"] }}</td>
+              <td class="table__td">{{ item["description"] }}</td>
+              <td class="table__td">{{ item["object_id"] }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
   </div>
   <div class="content-block">
     <h3 class="block-title">Опыты</h3>
-    <table class="block-table"></table>
+    <div class="block-table">
+      <table>
+        <thead>
+          <tr>
+            <th scope="">Номер объекта</th>
+            <th scope="">Описание</th>
+            <th scope="">Идентификатор</th>
+          </tr>
+        </thead>
+      </table>
+      <div class="table-scroll-wrapper">
+        <table>
+          <tbody>
+            {% for item in objects %}
+            <tr data-id="{{item['object_id']}}">
+              <td class="table__td">{{ item["object_number"] }}</td>
+              <td class="table__td">{{ item["description"] }}</td>
+              <td class="table__td">{{ item["object_id"] }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
   </div>
   <div class="content-block">
     <h3 class="block-title">Результаты</h3>
-    <table class="block-table"></table>
+    <div class="block-table">
+      <table>
+        <thead>
+          <tr>
+            <th scope="">Номер объекта</th>
+            <th scope="">Описание</th>
+            <th scope="">Идентификатор</th>
+          </tr>
+        </thead>
+      </table>
+      <div class="table-scroll-wrapper">
+        <table>
+          <tbody>
+            {% for item in objects %}
+            <tr>
+              <td class="table__td">{{ item["object_number"] }}</td>
+              <td class="table__td">{{ item["description"] }}</td>
+              <td class="table__td">{{ item["object_id"] }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
   </div>
 </div>
 
