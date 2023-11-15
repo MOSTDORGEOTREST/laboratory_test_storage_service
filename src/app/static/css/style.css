@@ -18,8 +18,8 @@
 
   /* ЦВЕТА */
 
-  --hue: 221;
-  --first-color: #73893d;
+  --hue: 201;
+  --first-color: #1985c0;
 
   --first-color-lighten: hsla(212, 11%, 50%, 0.2);
   --title-color: hsl(210, 2%, 18%);
@@ -28,12 +28,9 @@
   --body-color: hsl(var(--hue), 0%, 100%);
   --container-color: #fff;
 
-  --brown_logo: #897460;
-  --beige_logo: #d3a462;
-  --green_logo: #73893d;
-  --green_logo_hover: #596a2f;
-  --green_logo_shadow: #90a165;
-  --green_logo_form: #c7d0b2;
+  --green_logo: #1985c0;
+  --green_logo_hover: #136490;
+  --green_logo_shadow: #5a93b1;
 
   --form-item-width: 220px;
   /* grid gap */
@@ -309,6 +306,8 @@ img {
 }
 
 .content-wrapper {
+  padding-top: var(--row-gap);
+
   display: grid;
 
   grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));

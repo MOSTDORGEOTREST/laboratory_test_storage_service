@@ -18,7 +18,7 @@ endblock %} {% block content %}
         <table>
           <tbody>
             {% for item in objects %}
-            <tr>
+            <tr class="object-row" data-id="{{item['object_id']}}" >
               <td class="table__td">{{ item["object_number"] }}</td>
               <td class="table__td">{{ item["description"] }}</td>
               <td class="table__td">{{ item["object_id"] }}</td>
@@ -45,7 +45,7 @@ endblock %} {% block content %}
         <table>
           <tbody>
             {% for item in objects %}
-            <tr data-id="{{item['object_id']}}">
+            <tr>
               <td class="table__td">{{ item["object_number"] }}</td>
               <td class="table__td">{{ item["description"] }}</td>
               <td class="table__td">{{ item["object_id"] }}</td>

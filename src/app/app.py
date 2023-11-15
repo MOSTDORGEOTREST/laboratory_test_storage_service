@@ -66,9 +66,11 @@ async def index(request: Request,
         authorization: str = request.cookies.get("Authorization")
         scheme, token = get_authorization_scheme_param(authorization)
         if token:
-            objects = await objects_service.get_objects()
-
-            print(objects)
+            objects = []
+            try:
+                objects = await objects_service.get_objects()
+            except:
+                pass
 
             return templates.TemplateResponse("personal.html",
                                                context={"request": request,
