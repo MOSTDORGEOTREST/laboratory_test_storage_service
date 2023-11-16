@@ -10,6 +10,10 @@ if (objects.length > 0) {
     function onObjectClick(event) {
         event.preventDefault();
 
-        console.log('objID:', event.currentTarget.dataset.id);
+        const objNum = event.currentTarget.dataset.id
+        if (!objNum) return;
+        console.log('object num : ', objNum);
+        getTests(objNum);
+
     }
 }

@@ -10,7 +10,7 @@ endblock %} {% block content %}
           <tr>
             <th scope="">Номер объекта</th>
             <th scope="">Описание</th>
-            <th scope="">Идентификатор</th>
+            <th scope="">ID</th>
           </tr>
         </thead>
       </table>
@@ -18,7 +18,7 @@ endblock %} {% block content %}
         <table>
           <tbody>
             {% for item in objects %}
-            <tr class="object-row" data-id="{{item['object_id']}}" >
+            <tr class="object-row" data-id="{{item['object_number']}}" >
               <td class="table__td">{{ item["object_number"] }}</td>
               <td class="table__td">{{ item["description"] }}</td>
               <td class="table__td">{{ item["object_id"] }}</td>
@@ -35,22 +35,17 @@ endblock %} {% block content %}
       <table>
         <thead>
           <tr>
-            <th scope="">Номер объекта</th>
-            <th scope="">Описание</th>
-            <th scope="">Идентификатор</th>
+            <th scope="">ID</th>
+            <th scope="">Скважина</th>
+            <th scope="">Л/Н</th>
+            <th scope="">Тип опыта</th>
+            <th scope="">Дата</th>
           </tr>
         </thead>
       </table>
       <div class="table-scroll-wrapper">
         <table>
-          <tbody>
-            {% for item in objects %}
-            <tr>
-              <td class="table__td">{{ item["object_number"] }}</td>
-              <td class="table__td">{{ item["description"] }}</td>
-              <td class="table__td">{{ item["object_id"] }}</td>
-            </tr>
-            {% endfor %}
+          <tbody id="tests-table-body">
           </tbody>
         </table>
       </div>
@@ -64,20 +59,13 @@ endblock %} {% block content %}
           <tr>
             <th scope="">Номер объекта</th>
             <th scope="">Описание</th>
-            <th scope="">Идентификатор</th>
+            <th scope="">ID</th>
           </tr>
         </thead>
       </table>
       <div class="table-scroll-wrapper">
         <table>
-          <tbody>
-            {% for item in objects %}
-            <tr>
-              <td class="table__td">{{ item["object_number"] }}</td>
-              <td class="table__td">{{ item["description"] }}</td>
-              <td class="table__td">{{ item["object_id"] }}</td>
-            </tr>
-            {% endfor %}
+          <tbody id="results-table-body">
           </tbody>
         </table>
       </div>

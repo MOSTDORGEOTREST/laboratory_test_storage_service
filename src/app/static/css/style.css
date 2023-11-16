@@ -342,8 +342,10 @@ img {
   border: none;
   padding: 10px 15px;
   background-color: #ddd;
-  font-size: var(--h3-font-size);
+  font-size: var(--normal-font-size);
   vertical-align: top;
+
+  text-wrap: nowrap;
 }
 
 .block-table thead th:first-child {
