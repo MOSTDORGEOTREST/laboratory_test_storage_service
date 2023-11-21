@@ -101,9 +101,9 @@ function getTests(objNum) {
       cleanTables();
 
       response.json().then((data) => {
-		console.log(data);
+        console.log(data);
         if (data && data.length > 0) {
-			fillTables(data);
+          fillTables(data);
         }
       });
       return;
@@ -116,12 +116,23 @@ function getTests(objNum) {
 }
 
 function cleanTables() {
-  const testsTable = document.getElementById("tests-table-body");
-  const resultsTable = document.getElementById("results-table-body");
+  cleanTests();
+  cleanResults();
+}
 
-  if (!(testsTable && resultsTable)) return;
+function cleanTests() {
+  const testsTable = document.getElementById("tests-table-body");
+
+  if (!testsTable) return;
 
   testsTable.textContent = "";
+}
+
+function cleanResults() {
+  const resultsTable = document.getElementById("results-table-body");
+
+  if (!resultsTable) return;
+
   resultsTable.textContent = "";
 }
 
@@ -131,7 +142,7 @@ function formTableLine(trId, className, items) {
   const innerHtml = items.map((value) => {
     return `<td class="table__td">${value}</td>`;
   });
-  return html + innerHtml.join(' ') + "</tr>";
+  return html + innerHtml.join(" ") + "</tr>";
 }
 
 function fillTables(data) {
@@ -144,10 +155,10 @@ function fillTables(data) {
 
   if (!(testsTable && resultsTable)) return;
 
-  console.log('ready to fill');
+  console.log("ready to fill");
 
   data.forEach((item) => {
-    const testsRow = formTableLine(item["test_id"], 'tests-row', [
+    const testsRow = formTableLine(item["test_id"], "tests-row", [
       item["test_id"],
       item["borehole_name"],
       item["laboratory_number"],
@@ -156,28 +167,63 @@ function fillTables(data) {
     ]);
     testsTable.insertAdjacentHTML("beforeend", testsRow);
 
-	addTestsClicker();
+    addTestsClicker(item, resultsTable);
+
+    fillResults(item, resultsTable);
   });
 }
 
+function addTestsClicker(item, resultsTable) {
+  const tests = document.querySelectorAll(`.tests-row[data-id='${item["test_id"]}'`);
 
-function addTestsClicker() {
-	const tests = document.querySelectorAll(
-		'.tests-row[data-id]'
-	)
-	
-	if (tests.length > 0) {
-		tests.forEach((item) => {
-			item.addEventListener('click', onTestClick)
-		})
-	
-		function onTestClick(event) {
-			event.preventDefault();
-	
-			const testId = event.currentTarget.dataset.id
-			if (!testId) return;
-			console.log('test id : ', testId);
-	
-		}
-	}
+  console.log('item : ', item);
+  console.log('tests : ', tests);
+
+  if (tests.length === 1) {
+    tests[0].addEventListener("click", (event)=>{
+        event.preventDefault();
+        event.stopPropagation();
+
+        cleanResults();
+        fillResults(item, resultsTable);
+      });
+    }
+
+  // if (tests.length > 0) {
+  //   tests.forEach((item) => {
+  //     item.addEventListener("click", onTestClick);
+  //   });
+
+  //   function onTestClick(event) {
+  //     event.preventDefault();
+
+  //     const testId = event.currentTarget.dataset.id;
+  //     if (!testId) return;
+      
+      
+  //   }
+  // }
+}
+
+function fillResults(item, resultsTable) {
+  const params = Object.keys(item["test_params"])
+    .map((key) => {
+      return `<div>${key}: ${item["test_params"][key]}</div>`;
+    })
+    .join("");
+
+  const results = Object.keys(item["test_results"])
+    .map((key) => {
+      return `<div>${key}: ${item["test_results"][key]}</div>`;
+    })
+    .join("");
+
+  const resultsRow = formTableLine("", "results-row", [
+    item["laboratory_number"],
+    item["test_type"],
+    new Date(item["timestamp"]).toLocaleDateString(),
+    params,
+    results,
+  ]);
+  resultsTable.insertAdjacentHTML("beforeend", resultsRow);
 }
