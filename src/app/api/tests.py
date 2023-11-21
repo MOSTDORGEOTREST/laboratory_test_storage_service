@@ -60,7 +60,7 @@ async def create_test(
     """Создание испытания"""
     return await service.create(test_data=data)
 
-@router.put("/", response_model=TestUpdate)
+@router.put("/")
 async def update_test(
         test_id: int,
         data: TestUpdate,
