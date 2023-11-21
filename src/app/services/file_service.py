@@ -36,7 +36,10 @@ class FileService:
         files = files.scalars().first()
 
         if not files:
-            raise H
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"No files with id {file_id}"
+            )
 
         return files
 
