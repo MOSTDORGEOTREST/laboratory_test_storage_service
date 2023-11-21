@@ -93,6 +93,7 @@ async def get_files(
 async def upload_file(
         test_id: int,
         file: UploadFile,
+        description: str = None,
         service: FileService = Depends(get_file_service),
         s3_service: S3Service = Depends(get_s3_service),
         user: User = Depends(get_current_user),
@@ -106,7 +107,7 @@ async def upload_file(
 
     resp = await s3_service.upload(data=contents, key=f"{configs.s3_pre_key}{test_id}/{filename}")
 
-    return await service.create_file(test_id=test_id, filename=filename)
+    return await service.create_file(test_id=test_id, filename=filename, description=description)
 
 @router.delete('/files/', status_code=status.HTTP_204_NO_CONTENT)
 async def delete_files(

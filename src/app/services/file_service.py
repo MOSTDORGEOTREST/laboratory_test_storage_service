@@ -54,12 +54,13 @@ class FileService:
 
         return files
 
-    async def create_file(self, test_id: str, filename: str) -> tables.Files:
+    async def create_file(self, test_id: str, filename: str, description: str = None) -> tables.Files:
         await self._get_test(test_id)
 
         file = tables.Files(
             key=f"{configs.s3_pre_key}{test_id}/{filename}",
             test_id=test_id,
+            description=description,
         )
         self.session.add(file)
         await self.session.commit()
