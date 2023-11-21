@@ -165,13 +165,17 @@ class TestService:
         return Test(test_id=id.first()[0], **test_data.model_dump())
 
     async def update(self, test_id: int, test_data: TestUpdate) -> tables.Tests:
-        await self._get_sample(test_data.sample_id)
-        await self._get_test_type(test_data.test_type_id)
         test = await self._get_test(test_id)
+
+        data = test_data.to_dict()
+
+        if data.get("sample_id", None):
+            await self._get_sample(test_data.sample_id)
+        if data.get("test_type_id", None):
+            await self._get_test_type(test_data.test_type_id)
 
         test_params = test.test_params
         test_results = test.test_results
-        data = test_data.to_dict()
 
         if data.get("test_params", None):
             test_params.update(data["test_params"])
