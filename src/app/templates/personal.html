@@ -59,7 +59,6 @@ endblock %} {% block content %}
           <tr>
             <th scope="">Л/Н</th>
             <th scope="">Тип опыта</th>
-            <th scope="">Дата</th>
             <th scope="">Параметры</th>
             <th scope="">Результаты</th>
           </tr>
@@ -73,6 +72,23 @@ endblock %} {% block content %}
       </div>
     </div>
   </div>
+  <div class="content-block files">
+    <h3 class="block-title">Файлы</h3>
+    <div class="block-table">
+      <table>
+        <thead>
+          <tr>
+            <th scope="">Название</th>
+          </tr>
+        </thead>
+      </table>
+      <div class="table-scroll-wrapper">
+        <table>
+          <tbody id="files-table-body">
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
 </div>
-
 {% endblock %}

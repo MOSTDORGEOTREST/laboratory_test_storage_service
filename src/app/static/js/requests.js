@@ -101,7 +101,6 @@ function getTests(objNum) {
       cleanTables();
 
       response.json().then((data) => {
-        console.log(data);
         if (data && data.length > 0) {
           fillTables(data);
         }
@@ -118,6 +117,7 @@ function getTests(objNum) {
 function cleanTables() {
   cleanTests();
   cleanResults();
+  cleanFiles();
 }
 
 function cleanTests() {
@@ -136,6 +136,15 @@ function cleanResults() {
   resultsTable.textContent = "";
 }
 
+
+function cleanFiles() {
+  const filesTable = document.getElementById("files-table-body");
+
+  if (!filesTable) return;
+
+  filesTable.textContent = "";
+}
+
 function formTableLine(trId, className, items) {
   let html = `<tr class="${className}" data-id="${trId}" >`;
 
@@ -151,11 +160,7 @@ function fillTables(data) {
   const testsTable = document.getElementById("tests-table-body");
   const resultsTable = document.getElementById("results-table-body");
 
-  console.log(testsTable, resultsTable);
-
   if (!(testsTable && resultsTable)) return;
-
-  console.log("ready to fill");
 
   data.forEach((item) => {
     const testsRow = formTableLine(item["test_id"], "tests-row", [
@@ -169,40 +174,24 @@ function fillTables(data) {
 
     addTestsClicker(item, resultsTable);
 
-    fillResults(item, resultsTable);
+    // fillResults(item, resultsTable);
   });
 }
 
 function addTestsClicker(item, resultsTable) {
-  const tests = document.querySelectorAll(`.tests-row[data-id='${item["test_id"]}'`);
-
-  console.log('item : ', item);
-  console.log('tests : ', tests);
+  const tests = document.querySelectorAll(
+    `.tests-row[data-id='${item["test_id"]}'`
+  );
 
   if (tests.length === 1) {
-    tests[0].addEventListener("click", (event)=>{
-        event.preventDefault();
-        event.stopPropagation();
+    tests[0].addEventListener("click", (event) => {
+      event.preventDefault();
+      event.stopPropagation();
 
-        cleanResults();
-        fillResults(item, resultsTable);
-      });
-    }
-
-  // if (tests.length > 0) {
-  //   tests.forEach((item) => {
-  //     item.addEventListener("click", onTestClick);
-  //   });
-
-  //   function onTestClick(event) {
-  //     event.preventDefault();
-
-  //     const testId = event.currentTarget.dataset.id;
-  //     if (!testId) return;
-      
-      
-  //   }
-  // }
+      cleanResults();
+      fillResults(item, resultsTable);
+    });
+  }
 }
 
 function fillResults(item, resultsTable) {
@@ -218,12 +207,69 @@ function fillResults(item, resultsTable) {
     })
     .join("");
 
-  const resultsRow = formTableLine("", "results-row", [
+  const resultsRow = formTableLine(item["test_id"], "results-row", [
     item["laboratory_number"],
     item["test_type"],
-    new Date(item["timestamp"]).toLocaleDateString(),
     params,
     results,
   ]);
   resultsTable.insertAdjacentHTML("beforeend", resultsRow);
+
+  addReusltsClicker(item);
 }
+
+
+// function addReusltsClicker(item, resultsTable) {
+//   const tests = document.querySelectorAll(
+//     `.results-row[data-id='${item["test_id"]}'`
+//   );
+
+//   console.log("item : ", item);
+//   console.log("tests : ", tests);
+
+
+//   if (tests.length === 1) {
+//     tests[0].addEventListener("click", (event) => {
+//       event.preventDefault();
+//       event.stopPropagation();
+
+//       console.log(item["test_id"]);
+//       cleanFiles();
+//       fillFiles(item);
+//     });
+//   }
+// }
+
+// function fillFiles(item) {
+//   const filesTable = document.getElementById("files-table-body");
+//   if (!filesTable) return;
+
+//   fetch(`./tests/files/?test_id=${item["test_id"]}`, {
+//     method: "GET", // *GET, POST, PUT, DELETE, etc.
+//     credentials: "include", // include, *same-origin, omit
+//     headers: {
+//       Accept: "application/json",
+//       "Content-Type": "application/x-www-form-urlencoded",
+//       // 'Content-Type': 'application/x-www-form-urlencoded',
+//       "X-Requested-With": "XMLHttpRequest",
+//     },
+//   }).then((response) => {
+//     if (response.ok && response.status === 200) {
+//       cleanFiles();
+
+//       response.json().then((data) => {
+//         if (data && data.length > 0) {
+//           data.forEach((file)=>{
+//             const row = `<tr><td><a target='_blank' href='./s3/?key=${file["key"]}'>${file["key"]}</a></td></tr>`
+//             filesTable.insertAdjacentHTML('beforeend', row);
+//           })
+//         }
+//       });
+//       return;
+//     }
+//     if (response.status === 404) {
+//       cleanFiles();
+//       return;
+//     }
+//   });
+// }
