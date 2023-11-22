@@ -11,6 +11,16 @@ exception_not_found = HTTPException(
     detail="Not found",
 )
 
+exception_not_empty_sample = HTTPException(
+    status_code=status.HTTP_409_CONFLICT,
+    detail="You should delete all tests in this sample before",
+)
+
+exception_not_empty_borehole = HTTPException(
+    status_code=status.HTTP_409_CONFLICT,
+    detail="You should delete all samples in this borehole before",
+)
+
 exception_not_unique = HTTPException(
     status_code=status.HTTP_409_CONFLICT,
     detail="Not unique",

@@ -74,10 +74,20 @@ async def update_test(
 async def delete_test(
         test_id: int,
         service: TestService = Depends(get_test_service),
+        file_service: FileService = Depends(get_file_service),
+        s3_service: S3Service = Depends(get_s3_service),
         user: User = Depends(get_current_user),
 ):
     """Удаление испытания"""
     await service.delete(test_id=test_id)
+
+    files = await file_service.get_test_files(test_id)
+
+    for file in files:
+        await s3_service.delete(file.key)
+
+    await file_service.delete_files(test_id)
+
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 @router.get("/files/", response_model=Optional[List[File]])
