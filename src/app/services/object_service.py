@@ -332,15 +332,14 @@ class ObjectService:
 
     async def delete_borehole(self, borehole_id: str):
         '''
-            Скважины и всех образцов из нее
             :param borehole_id:
             :return:
         '''
         samples = await self.session.execute(
-            select(tables.Tests).
+            select(tables.Samples).
             filter_by(borehole_id=borehole_id)
         )
-        samples = samples.scalars().all()
+        samples = samples.scalars().first()
 
         if not samples:
             q = delete(
@@ -351,7 +350,6 @@ class ObjectService:
             q.execution_options(synchronize_session="fetch")
 
             await self.session.execute(q)
-
             await self.session.commit()
         else:
             raise exception_not_empty_borehole

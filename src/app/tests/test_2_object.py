@@ -45,4 +45,4 @@ async def test_del_borehole(ac: AsyncClient, test_boreholes):
     response = await ac.delete(
         f"/objects/boreholes?borehole_id={test_boreholes[1]['borehole_id']}",
     )
-    assert response.status_code == 204
+    assert response.status_code == 409
