@@ -8,7 +8,7 @@ from sqlalchemy.future import select
 from sqlalchemy import update, delete
 from sqlalchemy.dialects.postgresql import insert
 
-from exeptions import exception_not_found
+from exeptions import exception_not_found, exception_not_empty_sample, exception_not_empty_borehole
 import database.tables as tables
 
 from models.object import Object
@@ -312,14 +312,23 @@ class ObjectService:
             )
 
     async def delete_sample(self, sample_id: str):
-        q = delete(
-            tables.Samples
-        ).where(
-            tables.Samples.sample_id == sample_id
+        test = await self.session.execute(
+            select(tables.Tests).
+            filter_by(sample_id=sample_id)
         )
-        q.execution_options(synchronize_session="fetch")
-        await self.session.execute(q)
-        await self.session.commit()
+        test = test.scalars().first()
+
+        if not test:
+            q = delete(
+                tables.Samples
+            ).where(
+                tables.Samples.sample_id == sample_id
+            )
+            q.execution_options(synchronize_session="fetch")
+            await self.session.execute(q)
+            await self.session.commit()
+        else:
+            raise exception_not_empty_sample
 
     async def delete_borehole(self, borehole_id: str):
         '''
@@ -327,23 +336,23 @@ class ObjectService:
             :param borehole_id:
             :return:
         '''
-        q = delete(
-            tables.Samples
-        ).where(
-            tables.Samples.borehole_id == borehole_id
+        samples = await self.session.execute(
+            select(tables.Tests).
+            filter_by(borehole_id=borehole_id)
         )
-        q.execution_options(synchronize_session="fetch")
+        samples = samples.scalars().all()
 
-        await self.session.execute(q)
+        if not samples:
+            q = delete(
+                tables.Boreholes
+            ).where(
+                tables.Boreholes.borehole_id == borehole_id
+            )
+            q.execution_options(synchronize_session="fetch")
 
-        q = delete(
-            tables.Boreholes
-        ).where(
-            tables.Boreholes.borehole_id == borehole_id
-        )
-        q.execution_options(synchronize_session="fetch")
+            await self.session.execute(q)
 
-        await self.session.execute(q)
-
-        await self.session.commit()
+            await self.session.commit()
+        else:
+            raise exception_not_empty_borehole
 
