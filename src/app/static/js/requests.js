@@ -209,7 +209,6 @@ function fillResults(item, resultsTable) {
 
   const resultsRow = formTableLine(item["test_id"], "results-row", [
     item["laboratory_number"],
-    item["test_type"],
     params,
     results,
   ]);
@@ -219,57 +218,59 @@ function fillResults(item, resultsTable) {
 }
 
 
-// function addReusltsClicker(item, resultsTable) {
-//   const tests = document.querySelectorAll(
-//     `.results-row[data-id='${item["test_id"]}'`
-//   );
+function addReusltsClicker(item, resultsTable) {
+  const tests = document.querySelectorAll(
+    `.results-row[data-id='${item["test_id"]}'`
+  );
 
-//   console.log("item : ", item);
-//   console.log("tests : ", tests);
+  console.log("item : ", item);
+  console.log("tests : ", tests);
 
 
-//   if (tests.length === 1) {
-//     tests[0].addEventListener("click", (event) => {
-//       event.preventDefault();
-//       event.stopPropagation();
+  if (tests.length === 1) {
+    tests[0].addEventListener("click", (event) => {
+      event.preventDefault();
+      event.stopPropagation();
 
-//       console.log(item["test_id"]);
-//       cleanFiles();
-//       fillFiles(item);
-//     });
-//   }
-// }
+      console.log(item["test_id"]);
+      cleanFiles();
+      fillFiles(item);
+    });
+  }
+}
 
-// function fillFiles(item) {
-//   const filesTable = document.getElementById("files-table-body");
-//   if (!filesTable) return;
+function fillFiles(item) {
+  const filesTable = document.getElementById("files-table-body");
+  if (!filesTable) return;
 
-//   fetch(`./tests/files/?test_id=${item["test_id"]}`, {
-//     method: "GET", // *GET, POST, PUT, DELETE, etc.
-//     credentials: "include", // include, *same-origin, omit
-//     headers: {
-//       Accept: "application/json",
-//       "Content-Type": "application/x-www-form-urlencoded",
-//       // 'Content-Type': 'application/x-www-form-urlencoded',
-//       "X-Requested-With": "XMLHttpRequest",
-//     },
-//   }).then((response) => {
-//     if (response.ok && response.status === 200) {
-//       cleanFiles();
+  fetch(`./tests/files/?test_id=${item["test_id"]}`, {
+    method: "GET", // *GET, POST, PUT, DELETE, etc.
+    credentials: "include", // include, *same-origin, omit
+    headers: {
+      Accept: "application/json",
+      "Content-Type": "application/x-www-form-urlencoded",
+      // 'Content-Type': 'application/x-www-form-urlencoded',
+      "X-Requested-With": "XMLHttpRequest",
+    },
+  }).then((response) => {
+    if (response.ok && response.status === 200) {
+      cleanFiles();
 
-//       response.json().then((data) => {
-//         if (data && data.length > 0) {
-//           data.forEach((file)=>{
-//             const row = `<tr><td><a target='_blank' href='./s3/?key=${file["key"]}'>${file["key"]}</a></td></tr>`
-//             filesTable.insertAdjacentHTML('beforeend', row);
-//           })
-//         }
-//       });
-//       return;
-//     }
-//     if (response.status === 404) {
-//       cleanFiles();
-//       return;
-//     }
-//   });
-// }
+      response.json().then((data) => {
+        if (data && data.length > 0) {
+          data.forEach((file)=>{
+            const td1 = `<td><a target='_blank' href='./s3/?key=${file["key"]}'>${file["key"]}</a></td>`
+            const td2 = `<td style='text-wrap: wrap;'>${file["description"]}</td>`
+            const row = `<tr>${td1}${td2}</tr>`
+            filesTable.insertAdjacentHTML('beforeend', row);
+          })
+        }
+      });
+      return;
+    }
+    if (response.status === 404) {
+      cleanFiles();
+      return;
+    }
+  });
+}
