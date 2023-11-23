@@ -213,8 +213,9 @@ function fillResults(item, resultsTable) {
     results,
   ]);
   resultsTable.insertAdjacentHTML("beforeend", resultsRow);
+  fillFiles(item);
 
-  addReusltsClicker(item);
+  // addReusltsClicker(item);
 }
 
 
