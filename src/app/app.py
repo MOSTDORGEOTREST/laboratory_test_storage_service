@@ -31,7 +31,7 @@ def create_ip_ports_array(ip: str, *ports):
 app = FastAPI(
     title="MDGT Laboratory Test Storage Service",
     description="Сервис для хранения результатов лабораторных испытаний грунтов",
-    version="0.9.1")
+    version="1.0.0")
 
 
 origins = [
