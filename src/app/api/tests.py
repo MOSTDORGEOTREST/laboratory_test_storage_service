@@ -79,6 +79,14 @@ async def delete_test(
         user: User = Depends(get_current_user),
 ):
     """Удаление испытания"""
+    try:
+        files = await file_service.get_test_files(test_id)
+
+        for file in files:
+            await s3_service.delete(file.key)
+    except Exception:
+        pass
+
     await file_service.delete_files(test_id)
 
     await service.delete(test_id=test_id)
