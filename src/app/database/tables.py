@@ -38,6 +38,7 @@ class Samples(Base):
     borehole_id = Column(String(32), ForeignKey('boreholes.borehole_id'), index=True)
     laboratory_number = Column(String(50))
     soil_type = Column(String(500))
+    properties = Column(JSONB, nullable=True, default=None)
     description = Column(String(500), default=None)
 
     tests = relationship("Tests")

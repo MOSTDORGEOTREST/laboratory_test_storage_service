@@ -5,6 +5,7 @@ class SampleBase(BaseModel):
     borehole_id: str
     laboratory_number: str
     soil_type: str
+    properties: Optional[dict] = None
     description: Optional[str] = None
 
 class Sample(SampleBase):

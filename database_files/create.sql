@@ -17,6 +17,7 @@ CREATE TABLE "samples" (
   "borehole_id" varchar(32),
   "laboratory_number" varchar(50),
   "soil_type" varchar(500),
+  "properties" jsonb DEFAULT null,
   "description" varchar(500) DEFAULT null
 );
 
