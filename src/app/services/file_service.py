@@ -1,25 +1,24 @@
-from fastapi import (
-    status,
-    HTTPException)
+from fastapi import status, HTTPException
 from typing import Optional, List
 from sqlalchemy.orm import Session
 from sqlalchemy.future import select
 from sqlalchemy import delete
+from sqlalchemy.ext.asyncio import AsyncSession
 
-from exeptions import exception_not_found
+from exceptions import exception_not_found
 import database.tables as tables
 from config import configs
 
+
 class FileService:
-    def __init__(self, session: Session):
+    def __init__(self, session: AsyncSession):
         self.session = session
 
-    async def _get_test(self, test_id) -> Optional[tables.Tests]:
-        test = await self.session.execute(
-            select(tables.Tests).
-            filter_by(test_id=test_id)
+    async def _get_test(self, test_id: str) -> tables.Tests:
+        result = await self.session.execute(
+            select(tables.Tests).filter_by(test_id=test_id)
         )
-        test = test.scalars().first()
+        test = result.scalars().first()
 
         if not test:
             raise HTTPException(
@@ -28,36 +27,34 @@ class FileService:
             )
         return test
 
-    async def get_file(self, file_id: str) -> Optional[tables.Files]:
-        files = await self.session.execute(
-            select(tables.Files).
-            filter_by(file_id=file_id)
+    async def get_file(self, file_id: str) -> tables.Files:
+        result = await self.session.execute(
+            select(tables.Files).filter_by(file_id=file_id)
         )
-        files = files.scalars().first()
+        file = result.scalars().first()
 
-        if not files:
+        if not file:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"No files with id {file_id}"
+                detail=f"No file with id {file_id}"
             )
 
-        return files
+        return file
 
-    async def get_test_files(self, test_id: str) -> Optional[List[tables.Files]]:
+    async def get_test_files(self, test_id: str) -> List[tables.Files]:
         await self._get_test(test_id)
 
-        files = await self.session.execute(
-            select(tables.Files).
-            filter_by(test_id=test_id)
+        result = await self.session.execute(
+            select(tables.Files).filter_by(test_id=test_id)
         )
-        files = files.scalars().all()
+        files = result.scalars().all()
 
         if not files:
             raise exception_not_found
 
         return files
 
-    async def create_file(self, test_id: str, filename: str, description: str = None) -> tables.Files:
+    async def create_file(self, test_id: str, filename: str, description: Optional[str] = None) -> tables.Files:
         await self._get_test(test_id)
 
         file = tables.Files(
@@ -70,29 +67,33 @@ class FileService:
 
         return file
 
-    async def delete_files(self, test_id: str):
+    async def delete_files(self, test_id: str) -> List[tables.Files]:
         await self._get_test(test_id)
 
-        files = await self.session.execute(
-            select(tables.Files).
-            filter_by(test_id=test_id)
+        result = await self.session.execute(
+            select(tables.Files).filter_by(test_id=test_id)
         )
-        files = files.scalars().all()
+        files = result.scalars().all()
 
         if not files:
-            return
+            return []
 
-        q = delete(tables.Files).where(tables.Files.test_id == test_id)
-        q.execution_options(synchronize_session="fetch")
-        await self.session.execute(q)
+        await self.session.execute(
+            delete(tables.Files).where(tables.Files.test_id == test_id)
+            .execution_options(synchronize_session="fetch")
+        )
         await self.session.commit()
+
         return files
 
-    async def delete_file(self, file_id: int):
-        q = delete(tables.Files).where(tables.Files.file_id == file_id)
-        q.execution_options(synchronize_session="fetch")
-        await self.session.execute(q)
+    async def delete_file(self, file_id: str) -> None:
+        result = await self.session.execute(
+            delete(tables.Files).where(tables.Files.file_id == file_id)
+            .execution_options(synchronize_session="fetch")
+        )
+        if result.rowcount == 0:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"No file with id {file_id} found to delete"
+            )
         await self.session.commit()
-
-
-

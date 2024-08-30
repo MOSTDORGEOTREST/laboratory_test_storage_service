@@ -1,16 +1,8 @@
-from datetime import (
-    datetime,
-    timedelta)
+from datetime import datetime, timedelta
+from typing import Optional, Dict
 from pydantic import ValidationError
-from jose import (
-    jwt,
-    JWTError)
-from typing import (
-    Optional,
-    Dict)
-from fastapi import (
-    Depends,
-    Request)
+from jose import jwt, JWTError
+from fastapi import Depends, Request, HTTPException, status
 from fastapi.security import OAuth2
 from fastapi.openapi.models import OAuthFlows as OAuthFlowsModel
 from fastapi.security.utils import get_authorization_scheme_param
@@ -18,7 +10,6 @@ from sqlalchemy.orm import Session
 
 from config import configs
 from models.user import User, Token
-from exeptions import exception_token
 
 __hash__ = lambda obj: id(obj)
 
@@ -30,30 +21,27 @@ class OAuth2PasswordBearerWithCookie(OAuth2):
         scopes: Optional[Dict[str, str]] = None,
         auto_error: bool = True,
     ):
-        if not scopes:
+        if scopes is None:
             scopes = {}
         flows = OAuthFlowsModel(password={"tokenUrl": tokenUrl, "scopes": scopes})
         super().__init__(flows=flows, scheme_name=scheme_name, auto_error=auto_error)
 
-    async def __call__(self, request: Request) -> Optional[Token]:
+    async def __call__(self, request: Request) -> Optional[str]:
         authorization_headers = request.headers.get("Authorization")
         authorization_cookies = request.cookies.get("Authorization")
 
-        authorization = authorization_cookies if authorization_cookies else authorization_headers
+        authorization = authorization_cookies or authorization_headers
 
-        scheme, param = get_authorization_scheme_param(authorization)
-        if not authorization or scheme.lower() != "bearer":
-            raise exception_token
+        scheme, param = get_authorization_scheme_param(authorization or "")
+        if scheme.lower() != "bearer":
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid authentication scheme")
 
         return param
 
-
 oauth2_scheme = OAuth2PasswordBearerWithCookie(tokenUrl='/authorization/sign-in/')
-
 
 def get_current_user(token: str = Depends(oauth2_scheme)) -> User:
     return AuthService.verify_token(token)
-
 
 class AuthService:
     @classmethod
@@ -64,25 +52,25 @@ class AuthService:
                 configs.jwt_secret,
                 algorithms=[configs.jwt_algorithm],
             )
+            user_data = payload.get('user')
+            if not user_data:
+                raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token payload")
+
+            return User(username=user_data['username'])
+
         except JWTError:
-            raise exception_token from None
-
-        user_data = payload.get('user')
-
-        try:
-            user = User(username=user_data['username'])
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Token validation failed")
         except ValidationError:
-            raise exception_token from None
-
-        return user
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid user data in token")
 
     @classmethod
-    def create_token(cls, username: str, exp=None) -> Token:
+    def create_token(cls, username: str, exp: Optional[datetime] = None) -> Token:
         now = datetime.utcnow()
+        expiration = exp or now + timedelta(days=int(configs.jwt_expiration))
         payload = {
             'iat': now,
             'nbf': now,
-            'exp': now + timedelta(days=int(configs.jwt_expiration)) if not exp else exp,
+            'exp': expiration,
             'sub': username,
             'user': {'username': username},
         }
@@ -100,9 +88,7 @@ class AuthService:
         if username == configs.superuser_name and password == configs.superuser_password:
             return self.create_token(username)
         else:
-            raise exception_token
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials")
 
-        return self.create_token(user)
-
-    async def get_token(self, username) -> Token:
+    async def get_token(self, username: str) -> Token:
         return self.create_token(username)
