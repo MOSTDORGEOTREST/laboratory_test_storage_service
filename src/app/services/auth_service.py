@@ -1,8 +1,16 @@
-from datetime import datetime, timedelta
+from datetime import (
+    datetime,
+    timedelta)
 from pydantic import ValidationError
-from jose import jwt, JWTError
-from typing import Optional, Dict
-from fastapi import  Depends,Request
+from jose import (
+    jwt,
+    JWTError)
+from typing import (
+    Optional,
+    Dict)
+from fastapi import (
+    Depends,
+    Request)
 from fastapi.security import OAuth2
 from fastapi.openapi.models import OAuthFlows as OAuthFlowsModel
 from fastapi.security.utils import get_authorization_scheme_param
@@ -10,7 +18,7 @@ from sqlalchemy.orm import Session
 
 from config import configs
 from models.user import User, Token
-from exceptions import exception_token
+from exeptions import exception_token
 
 __hash__ = lambda obj: id(obj)
 

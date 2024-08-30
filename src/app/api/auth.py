@@ -1,10 +1,14 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import (
+    APIRouter, Depends)
 from fastapi.security import OAuth2PasswordRequestForm
 from fastapi.responses import JSONResponse
-from fastapi.encoders import jsonable_encoder
 
-from models.user import Token, User
-from services.auth_service import AuthService, get_current_user
+from models.user import (
+    Token,
+    User)
+from services.auth_service import (
+    AuthService,
+    get_current_user)
 from services.depends import get_auth_service
 
 router = APIRouter(
@@ -17,7 +21,7 @@ async def sign_in(
         auth_data: OAuth2PasswordRequestForm = Depends(),
         auth_service: AuthService = Depends(get_auth_service)
 ):
-    """Получение токена (токен хранится в куки)"""
+    """Получение токена (токен зранится в куки)"""
     token = await auth_service.authenticate_user(auth_data.username, auth_data.password)
     content = {"message": "True"}
     response = JSONResponse(content=content)
