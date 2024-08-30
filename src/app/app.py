@@ -10,14 +10,14 @@ from fastapi_cache.backends.redis import RedisBackend
 from redis import asyncio as aioredis
 from fastapi.security.utils import get_authorization_scheme_param
 
+from starlette.middleware import Middleware
+from starlette.middleware.base import BaseHTTPMiddleware
+
 from config import configs
 from database.database import engine, Base
 from api import router
 from services.depends import get_object_service
 from services.object_service import ObjectService
-
-from starlette.middleware import Middleware
-from starlette.middleware.base import BaseHTTPMiddleware
 
 
 def create_ip_ports_array(ip: str, *ports):

@@ -27,7 +27,7 @@ async def sign_in(
         raise HTTPException(status_code=e.status_code, detail="Invalid credentials")
 
 @router.post('/token/', response_model=Token)
-async def refresh_token(
+async def get_token(
         user: User = Depends(get_current_user),
         auth_service: AuthService = Depends(get_auth_service)
 ):
