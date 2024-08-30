@@ -58,8 +58,7 @@ class LimitUploadSizeMiddleware(BaseHTTPMiddleware):
         return await call_next(request)
 
 # Добавляем middleware в приложение
-#app.add_middleware(LimitUploadSizeMiddleware, max_upload_size=50 * 1024 * 1024)  # например, 50MB
-
+app.add_middleware(LimitUploadSizeMiddleware, max_upload_size=50 * 1024 * 1024)  # например, 50MB
 
 app.include_router(router)
 
