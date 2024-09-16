@@ -3,23 +3,23 @@ from typing import Optional
 from datetime import datetime
 
 class FileBase(BaseModel):
-    file_id: int = Field(..., description="Unique identifier for the file")
-    test_id: int = Field(..., description="Identifier for the associated test")
-    upload: datetime = Field(..., description="Timestamp of when the file was uploaded")
-    key: str = Field(..., description="Unique key for file storage or retrieval")
-    description: Optional[str] = Field(None, description="Optional description of the file")
+    file_id: int = Field(..., description="Уникальный идентификатор файла")
+    test_id: int = Field(..., description="Идентификатор связанного теста")
+    upload: datetime = Field(..., description="Временная метка загрузки файла")
+    key: str = Field(..., description="Уникальный ключ для хранения или извлечения файла")
+    description: Optional[str] = Field(None, description="Необязательное описание файла")
 
     class Config:
-        from_attributes = True  # Enable ORM mode for compatibility with database models
+        from_attributes = True  # Включить режим ORM для совместимости с моделями базы данных
 
 class File(FileBase):
-    file_id: int = Field(..., description="Unique identifier for the file")  # Ensures type consistency
+    file_id: int = Field(..., description="Уникальный идентификатор файла")  # Гарантирует согласованность типов
 
     class Config:
-        from_attributes = True  # Allow creation from ORM or other objects
+        from_attributes = True  # Разрешить создание из ORM или других объектов
 
 class FileCreateUpdate(FileBase):
-    test_id: Optional[int] = Field(None, description="Updated identifier for the associated test")
-    upload: Optional[datetime] = Field(None, description="Updated timestamp of when the file was uploaded")
-    key: Optional[str] = Field(None, description="Updated unique key for file storage or retrieval")
-    description: Optional[str] = Field(None, description="Updated optional description of the file")
+    test_id: Optional[int] = Field(None, description="Обновленный идентификатор связанного теста")
+    upload: Optional[datetime] = Field(None, description="Обновленная временная метка загрузки файла")
+    key: Optional[str] = Field(None, description="Обновленный уникальный ключ для хранения или извлечения файла")
+    description: Optional[str] = Field(None, description="Обновленное необязательное описание файла")

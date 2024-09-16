@@ -3,48 +3,48 @@ from typing import Optional, Dict, Any
 from datetime import datetime
 
 class TestBase(BaseModel):
-    sample_id: str = Field(..., description="Identifier of the sample associated with the test")
-    test_type_id: int = Field(..., description="Identifier of the type of test")
-    timestamp: datetime = Field(..., description="Timestamp of when the test was conducted")
-    test_params: Optional[Dict[str, Any]] = Field(None, description="Optional dictionary containing test parameters")
-    test_results: Optional[Dict[str, Any]] = Field(None, description="Optional dictionary containing test results")
-    description: Optional[str] = Field(None, description="Optional description of the test")
+    sample_id: str = Field(..., description="Идентификатор образца, связанного с тестом")
+    test_type_id: int = Field(..., description="Идентификатор типа теста")
+    timestamp: datetime = Field(..., description="Время проведения теста")
+    test_params: Optional[Dict[str, Any]] = Field(None, description="Опциональный словарь, содержащий параметры теста")
+    test_results: Optional[Dict[str, Any]] = Field(None, description="Опциональный словарь, содержащий результаты теста")
+    description: Optional[str] = Field(None, description="Опциональное описание теста")
 
 class Test(TestBase):
-    test_id: int = Field(..., description="Unique identifier for the test")
+    test_id: int = Field(..., description="Уникальный идентификатор теста")
 
     class Config:
-        from_attributes = True  # Allow creation from ORM or other attribute-based objects
+        from_attributes = True  # Разрешает создание объектов на основе ORM или других объектов с атрибутами
 
 class TestFullView(BaseModel):
-    test_id: int = Field(..., description="Unique identifier for the test")
-    object_number: str = Field(..., description="Identifier of the object associated with the test")
-    borehole_name: str = Field(..., description="Name of the borehole from which the sample was taken")
-    laboratory_number: str = Field(..., description="Unique laboratory number assigned to the sample")
-    soil_type: str = Field(..., description="Type of soil for the sample")
-    test_type: str = Field(..., description="Type of test performed")
-    timestamp: datetime = Field(..., description="Timestamp of when the test was conducted")
-    test_params: Optional[Dict[str, Any]] = Field(None, description="Optional dictionary containing test parameters")
-    test_results: Optional[Dict[str, Any]] = Field(None, description="Optional dictionary containing test results")
-    description: Optional[str] = Field(None, description="Optional description of the test")
+    test_id: int = Field(..., description="Уникальный идентификатор теста")
+    object_number: str = Field(..., description="Идентификатор объекта, связанного с тестом")
+    borehole_name: str = Field(..., description="Название скважины, из которой был взят образец")
+    laboratory_number: str = Field(..., description="Уникальный лабораторный номер, присвоенный образцу")
+    soil_type: str = Field(..., description="Тип почвы для образца")
+    test_type: str = Field(..., description="Тип проведенного теста")
+    timestamp: datetime = Field(..., description="Время проведения теста")
+    test_params: Optional[Dict[str, Any]] = Field(None, description="Опциональный словарь, содержащий параметры теста")
+    test_results: Optional[Dict[str, Any]] = Field(None, description="Опциональный словарь, содержащий результаты теста")
+    description: Optional[str] = Field(None, description="Опциональное описание теста")
 
     class Config:
-        from_attributes = True  # Allow creation from ORM or other attribute-based objects
+        from_attributes = True  # Разрешает создание объектов на основе ORM или других объектов с атрибутами
 
 class TestCreate(TestBase):
-    pass  # Inherits from TestBase with no changes
+    pass  # Наследует от TestBase без изменений
 
 class TestUpdate(BaseModel):
-    sample_id: Optional[str] = Field(None, description="Updated identifier of the sample associated with the test")
-    test_type_id: Optional[int] = Field(None, description="Updated identifier of the type of test")
-    timestamp: Optional[datetime] = Field(None, description="Updated timestamp of when the test was conducted")
-    test_params: Optional[Dict[str, Any]] = Field(None, description="Updated dictionary containing test parameters")
-    test_results: Optional[Dict[str, Any]] = Field(None, description="Updated dictionary containing test results")
-    description: Optional[str] = Field(None, description="Updated description of the test")
+    sample_id: Optional[str] = Field(None, description="Обновленный идентификатор образца, связанного с тестом")
+    test_type_id: Optional[int] = Field(None, description="Обновленный идентификатор типа теста")
+    timestamp: Optional[datetime] = Field(None, description="Обновленное время проведения теста")
+    test_params: Optional[Dict[str, Any]] = Field(None, description="Обновленный словарь, содержащий параметры теста")
+    test_results: Optional[Dict[str, Any]] = Field(None, description="Обновленный словарь, содержащий результаты теста")
+    description: Optional[str] = Field(None, description="Обновленное описание теста")
 
     def to_dict(self) -> Dict[str, Optional[str]]:
         """
-        Converts the TestUpdate instance to a dictionary, omitting keys with None values.
+        Преобразует экземпляр TestUpdate в словарь, исключая ключи со значением None.
         """
         self_dict = self.dict()
         return {key: value for key, value in self_dict.items() if value is not None}

@@ -2,20 +2,17 @@ from pydantic import BaseModel, Field
 from typing import Optional
 
 class TestTypeBase(BaseModel):
-    test_type: str = Field(..., description="The type of the test")
-    description: Optional[str] = Field(None, description="Optional description of the test type")
-
-    class Config:
-        from_attributes = True  # Enable ORM mode for compatibility with database models
+    test_type: str = Field(..., description="Тип теста")
+    description: Optional[str] = Field(None, description="Необязательное описание типа теста")
 
 class TestType(TestTypeBase):
-    test_type_id: int = Field(..., description="Unique identifier for the test type")
+    test_type_id: int = Field(..., description="Уникальный идентификатор типа теста")
 
     class Config:
-        from_attributes = True  # Allow creation from ORM or other attribute-based objects
+        from_attributes = True  # Разрешить создание из ORM или других объектов на основе атрибутов
 
 class TestTypeUpdate(TestTypeBase):
-    pass  # Inherits from TestTypeBase with no changes, allowing partial updates
+    pass  # Наследуется от TestTypeBase без изменений, что позволяет частичные обновления
 
 class TestTypeCreate(TestTypeBase):
-    pass  # Inherits from TestTypeBase with no changes, used for creating new instances
+    pass  # Наследуется от TestTypeBase без изменений, используется для создания новых экземпляров
