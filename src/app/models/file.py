@@ -9,9 +9,6 @@ class FileBase(BaseModel):
     key: str = Field(..., description="Уникальный ключ для хранения или извлечения файла")
     description: Optional[str] = Field(None, description="Необязательное описание файла")
 
-    class Config:
-        from_attributes = True  # Включить режим ORM для совместимости с моделями базы данных
-
 class File(FileBase):
     file_id: int = Field(..., description="Уникальный идентификатор файла")  # Гарантирует согласованность типов
 
