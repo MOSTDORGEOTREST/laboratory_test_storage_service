@@ -18,5 +18,5 @@ class SampleUpdate(SampleBase):
     borehole_id: Optional[str] = Field(None, description="Updated identifier of the borehole from which the sample was taken")
     laboratory_number: Optional[str] = Field(None, description="Updated laboratory number assigned to the sample")
     soil_type: Optional[str] = Field(None, description="Updated type of soil for the sample")
-    properties: Optional[Dict[str, str]] = Field(None, description="Updated dictionary containing properties of the sample")
+    properties: Optional[Dict[str, Any]] = Field(None, description="Updated dictionary containing properties of the sample")
     description: Optional[str] = Field(None, description="Updated description of the sample")
