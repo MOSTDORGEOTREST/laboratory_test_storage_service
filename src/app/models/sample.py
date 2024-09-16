@@ -1,11 +1,11 @@
 from pydantic import BaseModel, Field
-from typing import Optional, Dict
+from typing import Optional, Dict, Any
 
 class SampleBase(BaseModel):
     borehole_id: str = Field(..., description="Identifier of the borehole from which the sample was taken")
     laboratory_number: str = Field(..., description="Unique laboratory number assigned to the sample")
     soil_type: str = Field(..., description="Type of soil for the sample")
-    properties: Optional[Dict[str, str]] = Field(None, description="Optional dictionary containing properties of the sample")
+    properties: Optional[Dict[str, Any]] = Field(None, description="Optional dictionary containing properties of the sample")
     description: Optional[str] = Field(None, description="Optional description of the sample")
 
 class Sample(SampleBase):
