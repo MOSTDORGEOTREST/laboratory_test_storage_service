@@ -14,6 +14,12 @@ from exceptions import exception_token
 
 __hash__ = lambda obj: id(obj)
 
+JWT_SECRET = configs.jwt_secret
+JWT_ALGORITHM = configs.jwt_algorithm
+JWT_EXPIRATION = configs.jwt_expiration
+SUPERUSER_NAME = configs.superuser_name
+SUPERUSER_PASSWORD = configs.superuser_password
+
 class OAuth2PasswordBearerWithCookie(OAuth2):
     def __init__(
         self,
@@ -22,16 +28,12 @@ class OAuth2PasswordBearerWithCookie(OAuth2):
         scopes: Optional[Dict[str, str]] = None,
         auto_error: bool = True,
     ):
-        if not scopes:
-            scopes = {}
+        scopes = scopes or {}
         flows = OAuthFlowsModel(password={"tokenUrl": tokenUrl, "scopes": scopes})
         super().__init__(flows=flows, scheme_name=scheme_name, auto_error=auto_error)
 
     async def __call__(self, request: Request) -> Optional[Token]:
-        authorization_headers = request.headers.get("Authorization")
-        authorization_cookies = request.cookies.get("Authorization")
-
-        authorization = authorization_cookies if authorization_cookies else authorization_headers
+        authorization = request.cookies.get("Authorization") or request.headers.get("Authorization")
 
         scheme, param = get_authorization_scheme_param(authorization)
         if not authorization or scheme.lower() != "bearer":
@@ -53,35 +55,36 @@ class AuthService:
         try:
             payload = jwt.decode(
                 token,
-                configs.jwt_secret,
-                algorithms=[configs.jwt_algorithm],
+                JWT_SECRET,
+                algorithms=[JWT_ALGORITHM],
             )
         except JWTError:
             raise exception_token from None
 
         user_data = payload.get('user')
+        if not user_data:
+            raise exception_token
 
         try:
-            user = User(username=user_data['username'])
+            return User(username=user_data['username'])
         except ValidationError:
             raise exception_token from None
 
-        return user
-
     @classmethod
-    def create_token(cls, username: str, exp=None) -> Token:
+    def create_token(cls, username: str, exp: Optional[timedelta] = None) -> Token:
         now = datetime.utcnow()
+        expiration_time = exp or timedelta(days=int(JWT_EXPIRATION))
         payload = {
             'iat': now,
             'nbf': now,
-            'exp': now + timedelta(days=int(configs.jwt_expiration)) if not exp else exp,
+            'exp': now + expiration_time,
             'sub': username,
             'user': {'username': username},
         }
         token = jwt.encode(
             payload,
-            configs.jwt_secret,
-            algorithm=configs.jwt_algorithm,
+            JWT_SECRET,
+            algorithm=JWT_ALGORITHM,
         )
         return Token(access_token=token)
 
@@ -91,10 +94,8 @@ class AuthService:
     async def authenticate_user(self, username: str, password: str) -> Token:
         if username == configs.superuser_name and password == configs.superuser_password:
             return self.create_token(username)
-        else:
-            raise exception_token
 
-        return self.create_token(user)
+        raise exception_token
 
     async def get_token(self, username) -> Token:
         return self.create_token(username)

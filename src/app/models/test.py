@@ -10,9 +10,6 @@ class TestBase(BaseModel):
     test_results: Optional[Dict[str, Any]] = Field(None, description="Optional dictionary containing test results")
     description: Optional[str] = Field(None, description="Optional description of the test")
 
-    class Config:
-        from_attributes = True  # Enable ORM mode for compatibility with database models
-
 class Test(TestBase):
     test_id: int = Field(..., description="Unique identifier for the test")
 

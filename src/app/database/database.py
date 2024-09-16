@@ -5,7 +5,10 @@ from sqlalchemy.orm import sessionmaker
 from config import configs
 
 # Create an asynchronous engine using the provided database URL
-engine = create_async_engine(configs.database_url, future=True, echo=True)
+engine = create_async_engine(
+    configs.database_url,
+    future=True, echo=True
+)
 
 # Create a sessionmaker factory for creating asynchronous sessions
 async_session = sessionmaker(

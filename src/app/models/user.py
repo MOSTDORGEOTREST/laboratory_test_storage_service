@@ -1,7 +1,7 @@
 from pydantic import BaseModel, Field
 
 class BaseUser(BaseModel):
-    username: str
+    username: str = Field(..., description="Username")
 
 class User(BaseUser):
     pass

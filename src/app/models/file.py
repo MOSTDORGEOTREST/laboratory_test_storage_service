@@ -10,9 +10,6 @@ class FileBase(BaseModel):
     description: Optional[str] = Field(None, description="Optional description of the file")
 
     class Config:
-        use_enum_values = True  # Automatically use values of enums when applicable
-        populate_by_name = True  # Allow using aliases for field names
-        str_strip_whitespace = True  # Automatically strip leading/trailing whitespace from strings
         from_attributes = True  # Enable ORM mode for compatibility with database models
 
 class File(FileBase):
