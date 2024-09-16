@@ -1,7 +1,6 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends
 from fastapi.security import OAuth2PasswordRequestForm
 from fastapi.responses import JSONResponse
-from fastapi.encoders import jsonable_encoder
 
 from models.user import Token, User
 from services.auth_service import AuthService, get_current_user

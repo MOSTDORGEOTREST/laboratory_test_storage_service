@@ -1,11 +1,5 @@
-from fastapi import (
-    APIRouter,
-    Depends,
-    Response,
-    status)
-from typing import (
-    List,
-    Optional)
+from fastapi import APIRouter, Depends, Response, status
+from typing import List, Optional
 from fastapi_cache.decorator import cache
 
 from models.object import Object
@@ -18,7 +12,8 @@ from services.depends import get_object_service
 
 router = APIRouter(
     prefix="/objects",
-    tags=['objects'])
+    tags=['objects']
+)
 
 @router.get("/objects", response_model=Optional[List[Object]])
 @cache(expire=60)

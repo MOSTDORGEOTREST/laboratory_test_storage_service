@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.responses import StreamingResponse
 from io import BytesIO
+
 from services.depends import get_s3_service
 from services.s3 import S3Service
 
@@ -9,12 +10,12 @@ router = APIRouter(
     tags=['s3']
 )
 
-
 @router.get("/")
-async def get_file(
+async def get(
         key: str,
         s3_service: S3Service = Depends(get_s3_service)
 ):
+    '''Получение файлов'''
     """Получение файлов из S3"""
     try:
         file = await s3_service.get(key)
