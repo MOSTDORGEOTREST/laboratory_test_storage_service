@@ -20,19 +20,24 @@ async def get_service(service_class: Type[T]) -> AsyncGenerator[T, None]:
             yield service_class(session)
 
 async def get_auth_service() -> AsyncGenerator[AuthService, None]:
-    return get_service(AuthService)
+    async for service in get_service(AuthService):
+        return service
 
 async def get_object_service() -> AsyncGenerator[ObjectService, None]:
-    return get_service(ObjectService)
+    async for service in get_service(ObjectService):
+        return service
 
 async def get_test_service() -> AsyncGenerator[TestService, None]:
-    return get_service(TestService)
+    async for service in get_service(TestService):
+        return service
 
 async def get_test_type_service() -> AsyncGenerator[TestTypeService, None]:
-    return get_service(TestTypeService)
+    async for service in get_service(TestTypeService):
+        return service
 
 async def get_file_service() -> AsyncGenerator[FileService, None]:
-    return get_service(FileService)
+    async for service in get_service(FileService):
+        return service
 
 async def get_s3_service() -> AsyncGenerator[S3Service, None]:
     """
