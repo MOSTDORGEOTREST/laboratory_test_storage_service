@@ -15,11 +15,11 @@ class TestService:
         self.session = session
 
     async def _get_sample(self, sample_id: str) -> Optional[tables.Samples]:
-        sample = await self.session.execute(
+        result = await self.session.execute(
             select(tables.Samples).
             filter_by(sample_id=sample_id)
         )
-        sample = sample.scalars().first()
+        sample = result.scalars().first()
 
         if not sample:
             raise HTTPException(
@@ -29,11 +29,11 @@ class TestService:
         return sample
 
     async def _get_test_type(self, test_type_id: str) -> Optional[tables.TestTypes]:
-        test_type = await self.session.execute(
+        result = await self.session.execute(
             select(tables.TestTypes).
             filter_by(test_type_id=test_type_id)
         )
-        test_type = test_type.scalars().first()
+        test_type = result.scalars().first()
 
         if not test_type:
             raise HTTPException(
@@ -43,11 +43,11 @@ class TestService:
         return test_type
 
     async def _get_test(self, test_id) -> Optional[tables.Tests]:
-        test = await self.session.execute(
+        result = await self.session.execute(
             select(tables.Tests).
             filter_by(test_id=test_id)
         )
-        test = test.scalars().first()
+        test = result.scalars().first()
 
         if not test:
             raise exception_not_found
@@ -73,7 +73,7 @@ class TestService:
         if test_type:
             filters.append(tables.TestTypes.test_type == test_type)
 
-        tests = await self.session.execute(
+        result = await self.session.execute(
             select(
                 tables.Tests.test_id,
                 tables.Objects.object_number,
@@ -111,7 +111,7 @@ class TestService:
             limit(limit)
         )
 
-        tests = tests.fetchall()
+        tests = result.fetchall()
 
         if not tests:
             raise exception_not_found
@@ -152,8 +152,6 @@ class TestService:
             set_=stmt.excluded
         )
         id = await self.session.execute(stmt)
-        await self.session.commit()
-
         return Test(test_id=id.first()[0], **test_data.model_dump())
 
     async def update(self, test_id: int, test_data: TestUpdate) -> tables.Tests:
@@ -176,7 +174,7 @@ class TestService:
             test_results.update(data["test_results"])
             data["test_results"] = test_results
 
-        q = update(
+        update_query = update(
             tables.Tests
         ).where(
             tables.Tests.test_id == test_id
@@ -184,22 +182,20 @@ class TestService:
             **data
         )
 
-        q.execution_options(synchronize_session="fetch")
-        await self.session.execute(q)
-        await self.session.commit()
+        update_query.execution_options(synchronize_session="fetch")
+        await self.session.execute(update_query)
 
         return test_data
 
     async def delete(self, test_id: int):
-        q = delete(
+        delete_query = delete(
             tables.Tests
         ).where(
             tables.Tests.test_id == test_id
         )
 
-        q.execution_options(synchronize_session="fetch")
-        await self.session.execute(q)
-        await self.session.commit()
+        delete_query.execution_options(synchronize_session="fetch")
+        await self.session.execute(delete_query)
 
 
 

@@ -7,7 +7,7 @@ from models.file import File
 from models.user import User
 from services.auth_service import get_current_user
 from services.test_service import TestService
-from services.depends import get_test_service, get_file_service, get_s3_service
+from services.depends import get_test_service, get_file_service, get_s3_service, get_unit_of_work
 from services.s3 import S3Service
 from services.file_service import FileService
 from config import configs
@@ -61,22 +61,23 @@ async def update_test(
 @router.delete('/', status_code=status.HTTP_204_NO_CONTENT)
 async def delete_test(
         test_id: int,
-        service: TestService = Depends(get_test_service),
-        file_service: FileService = Depends(get_file_service),
-        s3_service: S3Service = Depends(get_s3_service),
+        uow: TestService = Depends(get_unit_of_work),
         user: User = Depends(get_current_user),
 ):
     """Удаление испытания"""
-    try:
-        files = await file_service.get_test_files(test_id)
+    service = uow['test_service']
+    s3_service = uow['s3_service']
+    file_service = uow['file_service']
 
-        for file in files:
-            await s3_service.delete(file.key)
-    except Exception:
-        pass
+    # Удаление файлов из объектного хранилища
+    files = await file_service.get_test_files(test_id)
+    for file in files:
+        await s3_service.delete(file.key)
 
+    # Удаление файлов из БД
     await file_service.delete_files(test_id)
 
+    # Удаление опыта из БД
     await service.delete(test_id=test_id)
 
     return Response(status_code=status.HTTP_204_NO_CONTENT)
@@ -95,50 +96,56 @@ async def upload_file(
         test_id: int,
         file: UploadFile,
         description: str = None,
-        service: FileService = Depends(get_file_service),
-        s3_service: S3Service = Depends(get_s3_service),
+        uow: TestService = Depends(get_unit_of_work),
         user: User = Depends(get_current_user),
 ):
     """Добавление файла"""
+    s3_service = uow['s3_service']
+    file_service = uow['file_service']
+
     contents = await file.read()
 
     filename = file.filename.replace(' ', '_')
 
-    await service._get_test(test_id)
+    await file_service._get_test(test_id)
 
-    resp = await s3_service.upload(data=contents, key=f"{configs.s3_pre_key}{test_id}/{filename}")
+    await s3_service.upload(data=contents, key=f"{configs.s3_pre_key}{test_id}/{filename}")
 
-    return await service.create_file(test_id=test_id, filename=filename, description=description)
+    return await file_service.create_file(test_id=test_id, filename=filename, description=description)
 
 @router.delete('/files/', status_code=status.HTTP_204_NO_CONTENT)
 async def delete_files(
         test_id: int,
-        service: FileService = Depends(get_file_service),
-        s3_service: S3Service = Depends(get_s3_service),
+        uow: TestService = Depends(get_unit_of_work),
         user: User = Depends(get_current_user),
 ):
     """Удаление всех файлов"""
-    files = await service.get_test_files(test_id)
+    s3_service = uow['s3_service']
+    file_service = uow['file_service']
+
+    files = await file_service.get_test_files(test_id)
 
     for file in files:
         await s3_service.delete(file.key)
 
-    await service.delete_files(test_id)
+    await file_service.delete_files(test_id)
 
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 @router.delete('/files/{file_id}', status_code=status.HTTP_204_NO_CONTENT)
 async def delete_file(
         file_id: int,
-        service: FileService = Depends(get_file_service),
-        s3_service: S3Service = Depends(get_s3_service),
+        uow: TestService = Depends(get_unit_of_work),
         user: User = Depends(get_current_user),
 ):
     """Удаление одного файла"""
-    file = await service.get_file(file_id)
+    s3_service = uow['s3_service']
+    file_service = uow['file_service']
+
+    file = await file_service.get_file(file_id)
 
     await s3_service.delete(file.key)
 
-    await service.delete_file(file_id)
+    await file_service.delete_file(file_id)
 
     return Response(status_code=status.HTTP_204_NO_CONTENT)

@@ -18,54 +18,54 @@ class ObjectService:
         self.session = session
 
     async def _get_object(self, object_id) -> Optional[tables.Objects]:
-        object = await self.session.execute(
+        result = await self.session.execute(
             select(tables.Objects).
             filter_by(object_id=object_id)
         )
-        object = object.scalars().first()
+        object = result.scalars().first()
 
         if not object:
             raise exception_not_found
         return object
 
     async def _get_borehole(self, borehole_id) -> Optional[tables.Boreholes]:
-        borehole = await self.session.execute(
+        result = await self.session.execute(
             select(tables.Boreholes).
             filter_by(borehole_id=borehole_id)
         )
-        borehole = borehole.scalars().first()
+        borehole = result.scalars().first()
 
         if not borehole:
             raise exception_not_found
         return borehole
 
     async def get_object_by_number(self, object_number: str) -> Optional[tables.Objects]:
-        object = await self.session.execute(
+        result = await self.session.execute(
             select(tables.Objects).
             filter_by(object_number=object_number)
         )
-        object = object.scalars().first()
+        object = result.scalars().first()
 
         if not object:
             raise exception_not_found
         return object
 
     async def get_objects(self) -> Optional[List[tables.Objects]]:
-        objects = await self.session.execute(
+        result = await self.session.execute(
             select(tables.Objects)
         )
-        objects = objects.scalars().all()
+        objects = result.scalars().all()
 
         if not objects:
             raise exception_not_found
         return objects
 
     async def get_boreholes(self, object_id: str) -> Optional[List[tables.Boreholes]]:
-        boreholes = await self.session.execute(
+        result = await self.session.execute(
             select(tables.Boreholes).
             filter_by(object_id=object_id)
         )
-        boreholes = boreholes.scalars().all()
+        boreholes = result.scalars().all()
 
         if not boreholes:
             raise exception_not_found
@@ -74,37 +74,37 @@ class ObjectService:
     async def get_borehole_by_name(self, object_number: str, borehole_name: str) -> Optional[tables.Boreholes]:
         object = await self.get_object_by_number(object_number)
 
-        borehole = await self.session.execute(
+        result = await self.session.execute(
             select(tables.Boreholes).
             filter_by(object_id=object.object_id, borehole_name=borehole_name)
         )
-        boreholes = borehole.scalars().first()
+        boreholes = result.scalars().first()
 
-        if not borehole:
+        if not boreholes:
             raise exception_not_found
         return boreholes
 
     async def get_samples(self, borehole_id: str) -> Optional[List[tables.Samples]]:
-        samples = await self.session.execute(
+        result = await self.session.execute(
             select(tables.Samples).
             filter_by(borehole_id=borehole_id)
         )
-        samples = samples.scalars().all()
+        samples = result.scalars().all()
 
         if not samples:
             raise exception_not_found
         return samples
 
     async def get_sample_by_laboratory_number(self, object_number: str, borehole_name: str, laboratory_number: str) -> Optional[tables.Samples]:
-        object = await self.get_object_by_number(object_number)
+        await self.get_object_by_number(object_number)
 
         borehole = await self.get_borehole_by_name(object_number=object_number, borehole_name=borehole_name)
 
-        sample = await self.session.execute(
+        result = await self.session.execute(
             select(tables.Samples).
             filter_by(borehole_id=borehole.borehole_id, laboratory_number=laboratory_number)
         )
-        sample = sample.scalars().first()
+        sample = result.scalars().first()
 
         if not sample:
             raise exception_not_found
@@ -123,15 +123,13 @@ class ObjectService:
             )
             await self.session.execute(stmt_object)
 
-            await self.session.commit()
-
             return JSONResponse(
                 content={'create': 'success'},
                 status_code=status.HTTP_201_CREATED
             )
 
         except Exception as err:
-            await self.session.rollback()
+            raise err
             return JSONResponse(
                 content={
                     'details': str(err),
@@ -159,15 +157,13 @@ class ObjectService:
 
                 await self.session.execute(stmt_borehole)
 
-            await self.session.commit()
-
             return JSONResponse(
                 content={'create': 'success'},
                 status_code=status.HTTP_201_CREATED
             )
 
         except Exception as err:
-            await self.session.rollback()
+            raise err
             return JSONResponse(
                 content={
                     'details': str(err),
@@ -194,15 +190,13 @@ class ObjectService:
 
                 await self.session.execute(stmt_sample)
 
-            await self.session.commit()
-
             return JSONResponse(
                 content={'create': 'success'},
                 status_code=status.HTTP_201_CREATED
             )
 
         except Exception as err:
-            await self.session.rollback()
+            raise err
             return JSONResponse(
                 content={
                     'details': str(err),
@@ -293,15 +287,13 @@ class ObjectService:
                     stmt_sample.execution_options(synchronize_session="fetch")
                     await self.session.execute(stmt_sample)
 
-            await self.session.commit()
-
             return JSONResponse(
                 content={'update': 'success'},
                 status_code=status.HTTP_200_OK
             )
 
         except Exception as err:
-            self.session.rollback()
+            raise err
             return JSONResponse(
                 content={
                     'details': str(err),
@@ -310,21 +302,20 @@ class ObjectService:
             )
 
     async def delete_sample(self, sample_id: str):
-        test = await self.session.execute(
+        result = await self.session.execute(
             select(tables.Tests).
             filter_by(sample_id=sample_id)
         )
-        test = test.scalars().first()
+        test = result.scalars().first()
 
         if not test:
-            q = delete(
+            delete_query = delete(
                 tables.Samples
             ).where(
                 tables.Samples.sample_id == sample_id
             )
-            q.execution_options(synchronize_session="fetch")
-            await self.session.execute(q)
-            await self.session.commit()
+            delete_query.execution_options(synchronize_session="fetch")
+            await self.session.execute(delete_query)
         else:
             raise exception_not_empty_sample
 
@@ -333,22 +324,21 @@ class ObjectService:
             :param borehole_id:
             :return:
         '''
-        samples = await self.session.execute(
+        result = await self.session.execute(
             select(tables.Samples).
             filter_by(borehole_id=borehole_id)
         )
-        samples = samples.scalars().first()
+        samples = result.scalars().first()
 
         if not samples:
-            q = delete(
+            delete_query = delete(
                 tables.Boreholes
             ).where(
                 tables.Boreholes.borehole_id == borehole_id
             )
-            q.execution_options(synchronize_session="fetch")
+            delete_query.execution_options(synchronize_session="fetch")
 
-            await self.session.execute(q)
-            await self.session.commit()
+            await self.session.execute(delete_query)
         else:
             raise exception_not_empty_borehole
 

@@ -14,11 +14,11 @@ class TestTypeService:
         self.session = session
 
     async def get_test_type_by_name(self, test_type: str) -> Optional[tables.TestTypes]:
-        test_type = await self.session.execute(
+        result = await self.session.execute(
             select(tables.TestTypes).
             filter_by(test_type=test_type)
         )
-        test_type = test_type.scalars().first()
+        test_type = result.scalars().first()
 
         if not test_type:
             raise exception_not_found
@@ -26,21 +26,21 @@ class TestTypeService:
             return test_type
 
     async def _test_type_unique(self, test_type: str) -> Optional[tables.TestTypes]:
-        test_type = await self.session.execute(
+        result = await self.session.execute(
             select(tables.TestTypes).
             filter_by(test_type=test_type)
         )
-        test_type = test_type.scalars().first()
+        test_type = result.scalars().first()
 
         if test_type:
             raise exception_not_unique
 
     async def get_test_type(self, test_type_id: int) -> Optional[tables.TestTypes]:
-        test_type = await self.session.execute(
+        result = await self.session.execute(
             select(tables.TestTypes).
             filter_by(test_type_id=test_type_id)
         )
-        test_type = test_type.scalars().first()
+        test_type = result.scalars().first()
 
         if not test_type:
             raise exception_not_found
@@ -50,12 +50,12 @@ class TestTypeService:
             self,
             limit: Optional[int] = None,
             offset: Optional[int] = None) -> List[tables.TestTypes]:
-        test_types = await self.session.execute(
+        result = await self.session.execute(
             select(tables.TestTypes).
             offset(offset).
             limit(limit)
         )
-        test_types = test_types.scalars().all()
+        test_types = result.scalars().all()
 
         if not test_types:
             raise exception_not_found
@@ -75,14 +75,13 @@ class TestTypeService:
             set_=stmt.excluded
         )
         await self.session.execute(stmt)
-        await self.session.commit()
 
         return test_type_data
 
     async def update(self, test_type_id: int, test_type_data: TestTypeUpdate) -> TestType:
         await self.get_test_type(test_type_id)
 
-        q = update(
+        update_query = update(
             tables.TestTypes
         ).where(
             tables.TestTypes.test_type_id == test_type_id
@@ -90,9 +89,8 @@ class TestTypeService:
             **test_type_data.model_dump()
         )
 
-        q.execution_options(synchronize_session="fetch")
-        test_type = await self.session.execute(q)
-        await self.session.commit()
+        update_query.execution_options(synchronize_session="fetch")
+        await self.session.execute(update_query)
 
         return TestType(test_type_id=test_type_id, **test_type_data.model_dump())
 
@@ -106,15 +104,15 @@ class TestTypeService:
         if test:
             raise exception_data_structure
 
-        q = delete(
+        delete_query = delete(
             tables.TestTypes
         ).where(
             tables.TestTypes.test_type_id == test_type_id
         )
 
-        q.execution_options(synchronize_session="fetch")
-        await self.session.execute(q)
-        await self.session.commit()
+        delete_query.execution_options(synchronize_session="fetch")
+
+        await self.session.execute(delete_query)
 
 
 

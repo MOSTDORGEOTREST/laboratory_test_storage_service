@@ -15,7 +15,6 @@ async def get(
         key: str,
         s3_service: S3Service = Depends(get_s3_service)
 ):
-    '''Получение файлов'''
     """Получение файлов из S3"""
     try:
         file = await s3_service.get(key)
