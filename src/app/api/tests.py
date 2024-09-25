@@ -69,16 +69,16 @@ async def delete_test(
     s3_service = uow['s3_service']
     file_service = uow['file_service']
 
-    # Удаление файлов из объектного хранилища
-    files = await file_service.get_test_files(test_id)
-    for file in files:
-        await s3_service.delete(file.key)
-
     # Удаление файлов из БД
     await file_service.delete_files(test_id)
 
     # Удаление опыта из БД
     await service.delete(test_id=test_id)
+
+    # Удаление файлов из объектного хранилища
+    files = await file_service.get_test_files(test_id)
+    for file in files:
+        await s3_service.delete(file.key)
 
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
@@ -109,9 +109,11 @@ async def upload_file(
 
     await file_service._get_test(test_id)
 
+    created_file = await file_service.create_file(test_id=test_id, filename=filename, description=description)
+
     await s3_service.upload(data=contents, key=f"{configs.s3_pre_key}{test_id}/{filename}")
 
-    return await file_service.create_file(test_id=test_id, filename=filename, description=description)
+    return created_file
 
 @router.delete('/files/', status_code=status.HTTP_204_NO_CONTENT)
 async def delete_files(
@@ -123,12 +125,12 @@ async def delete_files(
     s3_service = uow['s3_service']
     file_service = uow['file_service']
 
+    await file_service.delete_files(test_id)
+
     files = await file_service.get_test_files(test_id)
 
     for file in files:
         await s3_service.delete(file.key)
-
-    await file_service.delete_files(test_id)
 
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
@@ -142,10 +144,9 @@ async def delete_file(
     s3_service = uow['s3_service']
     file_service = uow['file_service']
 
-    file = await file_service.get_file(file_id)
-
-    await s3_service.delete(file.key)
-
     await file_service.delete_file(file_id)
+
+    file = await file_service.get_file(file_id)
+    await s3_service.delete(file.key)
 
     return Response(status_code=status.HTTP_204_NO_CONTENT)
