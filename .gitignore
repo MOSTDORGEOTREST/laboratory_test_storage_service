@@ -1,6 +1,6 @@
 **/key.key
 **/crt.crt
-**/.env
+.env
 **/venv
 **/env.txt
 **/.DS_Store

@@ -2,8 +2,8 @@ import os
 from dotenv import load_dotenv
 import http.client
 
-if os.path.exists(os.path.normpath(".env")):
-    load_dotenv(dotenv_path=os.path.normpath(".env"))
+if os.path.exists(os.path.normpath("../../.env")):
+    load_dotenv(dotenv_path=os.path.normpath("../../.env"))
 
 def get_self_public_ip():
     conn = http.client.HTTPConnection("ifconfig.me")
