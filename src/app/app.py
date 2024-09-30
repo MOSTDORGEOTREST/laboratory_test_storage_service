@@ -1,5 +1,5 @@
 import os
-
+from fastapi_profiler.profiler_middleware import PyInstrumentProfilerMiddleware
 from fastapi import Depends, FastAPI, Request, HTTPException, status, Response
 from starlette.middleware.cors import CORSMiddleware
 from starlette.middleware.base import BaseHTTPMiddleware
@@ -57,6 +57,8 @@ app.add_middleware(
     allow_headers=["*"], #["Content-Type", "Set-Cookie", "Access-Control-Allow-Headers", "Access-Control-Allow-Origin",
                    #"Authorization", "Accept", "X-Requested-With"],
 )
+
+app.add_middleware(PyInstrumentProfilerMiddleware)
 
 app.include_router(router)
 

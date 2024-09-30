@@ -28,3 +28,13 @@ services:
       - /etc/timezone:/etc/timezone:ro
       - /etc/localtime:/etc/localtime:ro
 
+  webserver:
+    restart: always
+    image: nginx:alpine
+    volumes:
+      - ./nginx/conf.d:/etc/nginx/conf.d
+    links:
+      - web:web
+    ports:
+      - "80:80"
+
