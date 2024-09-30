@@ -1,5 +1,4 @@
 import os
-from fastapi_profiler.profiler_middleware import PyInstrumentProfilerMiddleware
 from fastapi import Depends, FastAPI, Request, HTTPException, status, Response
 from starlette.middleware.cors import CORSMiddleware
 from starlette.middleware.base import BaseHTTPMiddleware
@@ -13,6 +12,8 @@ from fastapi_cache.backends.redis import RedisBackend
 from redis import asyncio as aioredis
 from fastapi.security.utils import get_authorization_scheme_param
 
+from fastapi_profiler.profiler_middleware import PyInstrumentProfilerMiddleware
+
 from config import configs
 from database.database import engine, Base
 from api import router
@@ -25,6 +26,7 @@ app = FastAPI(
     description="Сервис для хранения результатов лабораторных испытаний грунтов",
     version="1.0.0")
 
+app.add_middleware(PyInstrumentProfilerMiddleware)
 
 origins = [
     "http://localhost:3000",
@@ -57,8 +59,6 @@ app.add_middleware(
     allow_headers=["*"], #["Content-Type", "Set-Cookie", "Access-Control-Allow-Headers", "Access-Control-Allow-Origin",
                    #"Authorization", "Accept", "X-Requested-With"],
 )
-
-app.add_middleware(PyInstrumentProfilerMiddleware)
 
 app.include_router(router)
 
