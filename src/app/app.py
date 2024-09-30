@@ -12,7 +12,7 @@ from fastapi_cache.backends.redis import RedisBackend
 from redis import asyncio as aioredis
 from fastapi.security.utils import get_authorization_scheme_param
 
-#from fastapi_profiler.profiler_middleware import PyInstrumentProfilerMiddleware
+from fastapi_profiler import PyInstrumentProfilerMiddleware
 
 from config import configs
 from database.database import engine, Base
@@ -26,7 +26,7 @@ app = FastAPI(
     description="Сервис для хранения результатов лабораторных испытаний грунтов",
     version="1.0.0")
 
-#app.add_middleware(PyInstrumentProfilerMiddleware)
+app.add_middleware(PyInstrumentProfilerMiddleware)
 
 origins = [
     "http://localhost:3000",
