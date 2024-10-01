@@ -12,7 +12,7 @@ from fastapi_cache.backends.redis import RedisBackend
 from redis import asyncio as aioredis
 from fastapi.security.utils import get_authorization_scheme_param
 
-from fastapi_profiler import PyInstrumentProfilerMiddleware
+from starlette_exporter import PrometheusMiddleware, handle_metrics
 
 from config import configs
 from database.database import engine, Base
@@ -26,7 +26,8 @@ app = FastAPI(
     description="Сервис для хранения результатов лабораторных испытаний грунтов",
     version="1.0.0")
 
-app.add_middleware(PyInstrumentProfilerMiddleware)
+app.add_middleware(PrometheusMiddleware)
+app.add_route("/metrics", handle_metrics)
 
 origins = [
     "http://localhost:3000",
@@ -91,6 +92,11 @@ async def index(request: Request,
                 headers={'Authenticate': 'Bearer'})
     except HTTPException:
         return templates.TemplateResponse("index.html", context={"request": request})
+
+@app.get("/profile")
+async def profile():
+    # Получаем профиль и возвращаем его в виде HTML
+    return app.middleware_stack.app.middleware[0]._profiler.output_html()
 
 @app.on_event("startup")
 async def startup_event():
