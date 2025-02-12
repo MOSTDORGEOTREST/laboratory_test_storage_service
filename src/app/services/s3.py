@@ -59,3 +59,22 @@ class S3Service:
             Bucket=configs.bucket,
             Key=key
         )
+
+    async def generate_presigned_url(self, key: str, expiration: int = 3600) -> str:
+        """
+        Генерирует временную ссылку на файл в S3.
+
+        :param key: Ключ объекта в S3.
+        :param expiration: Время жизни ссылки в секундах (по умолчанию 1 час).
+        :return: Временная ссылка на файл.
+        :raises ClientError: Ошибка клиента AWS.
+        """
+        response = await self.client.generate_presigned_url(
+            'get_object',
+            Params={
+                'Bucket': configs.bucket,
+                'Key': key
+            },
+            ExpiresIn=expiration
+        )
+        return response

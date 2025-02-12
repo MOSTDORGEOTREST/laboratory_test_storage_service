@@ -3,7 +3,7 @@ name = "laboratory tests storage service"
 version = "1.0.0"
 description = ""
 authors = ["Nick <tnick1502@mail.ru>"]
-readme = "README.md"
+package-mode = false
 
 [tool.poetry.dependencies]
 python = "^3.10"
