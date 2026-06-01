@@ -1,3 +1,4 @@
+import json
 import os
 from fastapi import Depends, FastAPI, Request, HTTPException, status, Response
 from starlette.middleware.cors import CORSMiddleware
@@ -82,9 +83,22 @@ async def index(request: Request,
             except:
                 pass
 
-            return templates.TemplateResponse("personal.html",
-                                               context={"request": request,
-                                                        "objects": objects})
+            objects_json = json.dumps(
+                [
+                    {
+                        "object_id": str(o.object_id or ""),
+                        "object_number": str(o.object_number or ""),
+                        "description": str(o.description or ""),
+                    }
+                    for o in (objects or [])
+                    if o.object_number
+                ],
+                ensure_ascii=False,
+            )
+            return templates.TemplateResponse(
+                "personal.html",
+                context={"request": request, "objects_json": objects_json},
+            )
         else:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,

@@ -1,23 +1,39 @@
-{% extends 'base.html' %} {% block header %} {% include 'header.html' %} {%
-endblock %} {% block content %}
-<div class="login-wrapper">
-  <div class="login">
-    <form action="" class="login-form" id="login-form">
-      <input
-        type="text"
-        autocomplete="username"
-        class="form-item"
-        placeholder="Имя пользователя"
-        id="username"
-      />
-      <input
-        type="password"
-        autocomplete="current-password"
-        class="form-item"
-        placeholder="Пароль"
-        id="password"
-      />
-      <button type="submit" class="form-submit">ВОЙТИ</button>
+{% extends 'base.html' %}
+{% block header %}
+{% include 'header.html' %}
+{% endblock %}
+{% block content %}
+<div class="auth-page">
+  <div class="auth-card">
+    <div class="auth-card__brand">
+      <img src="/static/images/logo.png" alt="" class="auth-card__logo" />
+      <h1 class="auth-card__title">Вход в систему</h1>
+      <p class="auth-card__subtitle">Сервис хранения результатов лабораторных испытаний грунтов</p>
+    </div>
+    <form action="" class="auth-form" id="login-form">
+      <label class="field">
+        <span class="field__label">Имя пользователя</span>
+        <input
+          type="text"
+          autocomplete="username"
+          class="field__input"
+          placeholder="username"
+          id="username"
+          name="username"
+        />
+      </label>
+      <label class="field">
+        <span class="field__label">Пароль</span>
+        <input
+          type="password"
+          autocomplete="current-password"
+          class="field__input"
+          placeholder="••••••••"
+          id="password"
+          name="password"
+        />
+      </label>
+      <button type="submit" class="btn btn--primary btn--block">Войти</button>
     </form>
   </div>
 </div>

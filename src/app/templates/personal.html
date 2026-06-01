@@ -1,94 +1,102 @@
-{% extends 'base.html' %} {% block header %} {% include 'header.html' %} {%
-endblock %} {% block content %}
+{% extends 'base.html' %}
+{% block header %}
+{% include 'header.html' %}
+{% endblock %}
+{% block content %}
 
-<div class="content-wrapper">
-  <div class="content-block objects">
-    <h3 class="block-title">Объекты</h3>
-    <div class="block-table">
-      <table>
-        <thead>
-          <tr>
-            <th scope="">Номер объекта</th>
-            <th scope="">Описание</th>
-            <th scope="">ID</th>
-          </tr>
-        </thead>
-      </table>
-      <div class="table-scroll-wrapper">
-        <table>
-          <tbody>
-            {% for item in objects %}
-            <tr class="object-row" data-id="{{item['object_number']}}" >
-              <td class="table__td">{{ item["object_number"] }}</td>
-              <td class="table__td">{{ item["description"] }}</td>
-              <td class="table__td">{{ item["object_id"] }}</td>
-            </tr>
-            {% endfor %}
-          </tbody>
-        </table>
+<script id="objects-data" type="application/json">{{ objects_json | safe }}</script>
+
+<div class="dashboard" id="dashboard">
+  <aside class="panel panel--objects" aria-label="Список объектов">
+    <header class="panel__header">
+      <div class="panel__title-row">
+        <h2 class="panel__title">Объекты</h2>
+        <span class="badge" id="objects-count" aria-live="polite">0</span>
       </div>
-    </div>
-  </div>
-  <div class="content-block tests">
-    <h3 class="block-title">Опыты</h3>
-    <div class="block-table">
-      <table>
-        <thead>
-          <tr>
-            <th scope="">ID</th>
-            <th scope="">Скважина</th>
-            <th scope="">Л/Н</th>
-            <th scope="">Тип опыта</th>
-            <th scope="">Дата</th>
-          </tr>
-        </thead>
-      </table>
-      <div class="table-scroll-wrapper">
-        <table>
-          <tbody id="tests-table-body">
-          </tbody>
-        </table>
+      <div class="panel__toolbar">
+        <label class="search-field">
+          <span class="search-field__icon" aria-hidden="true">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3-3"/></svg>
+          </span>
+          <input type="search" id="objects-search" class="search-field__input" placeholder="Поиск по номеру, описанию, ID…" autocomplete="off" />
+        </label>
+        <select id="objects-sort" class="select-control" aria-label="Сортировка объектов">
+          <option value="number-asc">Номер ↑</option>
+          <option value="number-desc">Номер ↓</option>
+          <option value="desc-asc">Описание А–Я</option>
+          <option value="desc-desc">Описание Я–А</option>
+        </select>
       </div>
+    </header>
+    <div class="panel__body">
+      <ul class="entity-list" id="objects-list" role="listbox" aria-label="Объекты"></ul>
+      <p class="empty-state" id="objects-empty" hidden>Ничего не найдено</p>
     </div>
-  </div>
-  <div class="content-block results">
-    <h3 class="block-title">Результаты</h3>
-    <div class="block-table">
-      <table>
-        <thead>
-          <tr>
-            <th scope="">Л/Н</th>
-            <th scope="">Параметры</th>
-            <th scope="">Результаты</th>
-          </tr>
-        </thead>
-      </table>
-      <div class="table-scroll-wrapper">
-        <table>
-          <tbody id="results-table-body">
-          </tbody>
-        </table>
+  </aside>
+
+  <section class="panel panel--tests" aria-label="Список опытов">
+    <header class="panel__header">
+      <div class="panel__title-row">
+        <h2 class="panel__title">Опыты</h2>
+        <span class="badge" id="tests-count" aria-live="polite">0</span>
       </div>
-    </div>
-  </div>
-  <div class="content-block files">
-    <h3 class="block-title">Файлы</h3>
-    <div class="block-table">
-      <table>
-        <thead>
-          <tr>
-            <th scope="">Название</th>
-            <th>Описание</th>
-          </tr>
-        </thead>
-      </table>
-      <div class="table-scroll-wrapper">
-        <table>
-          <tbody id="files-table-body">
-          </tbody>
-        </table>
+      <p class="panel__subtitle" id="tests-subtitle">Выберите объект</p>
+      <div class="panel__toolbar">
+        <label class="search-field">
+          <span class="search-field__icon" aria-hidden="true">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3-3"/></svg>
+          </span>
+          <input type="search" id="tests-search" class="search-field__input" placeholder="Поиск по ID, скважине, л/н, типу…" autocomplete="off" disabled />
+        </label>
+        <select id="tests-sort" class="select-control" aria-label="Сортировка опытов" disabled>
+          <option value="date-desc">Сначала новые</option>
+          <option value="date-asc">Сначала старые</option>
+          <option value="type-asc">Тип опыта А–Я</option>
+          <option value="lab-asc">Л/Н ↑</option>
+        </select>
       </div>
+    </header>
+    <div class="panel__body">
+      <div class="loading-state" id="tests-loading" hidden>
+        <span class="spinner" aria-hidden="true"></span>
+        <span>Загрузка опытов…</span>
+      </div>
+      <ul class="entity-list" id="tests-list" role="listbox" aria-label="Опыты"></ul>
+      <p class="empty-state" id="tests-empty" hidden>Нет опытов по выбранному объекту</p>
+      <p class="empty-state empty-state--hint" id="tests-hint">Выберите объект слева, чтобы увидеть опыты</p>
     </div>
-  </div>
+  </section>
+
+  <section class="panel panel--detail" aria-label="Результаты и файлы">
+    <header class="panel__header">
+      <div class="panel__title-row">
+        <h2 class="panel__title">Детали опыта</h2>
+      </div>
+      <p class="panel__subtitle" id="detail-subtitle">Выберите опыт</p>
+    </header>
+    <div class="panel__body panel__body--detail">
+      <div class="detail-grid" id="detail-content" hidden>
+        <div class="detail-card">
+          <h3 class="detail-card__title">Параметры</h3>
+          <dl class="kv-list" id="params-list"></dl>
+        </div>
+        <div class="detail-card">
+          <h3 class="detail-card__title">Результаты</h3>
+          <dl class="kv-list" id="results-list"></dl>
+        </div>
+        <div class="detail-card detail-card--files">
+          <h3 class="detail-card__title">Файлы</h3>
+          <ul class="file-list" id="files-list"></ul>
+          <p class="empty-state empty-state--compact" id="files-empty" hidden>Файлов нет</p>
+          <div class="loading-state loading-state--inline" id="files-loading" hidden>
+            <span class="spinner" aria-hidden="true"></span>
+            <span>Загрузка…</span>
+          </div>
+        </div>
+      </div>
+      <p class="empty-state empty-state--hint" id="detail-hint">Выберите опыт, чтобы увидеть параметры, результаты и файлы</p>
+    </div>
+  </section>
 </div>
+
 {% endblock %}
