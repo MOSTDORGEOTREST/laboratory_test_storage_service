@@ -458,6 +458,120 @@
     return list;
   }
 
+  /* ================= Комбобокс объектов (ввод с подсказками) =================
+     Объектов в базе много — выпадающий select неудобен. Ввод с фильтрацией
+     по номеру и описанию, клавиатурной навигацией и точным применением. */
+  function createObjectCombo({ input, listEl, clearBtn, onPick }) {
+    let activeIndex = -1;
+    let items = [];
+    let applied = ""; // применённый номер объекта
+
+    function matches(query) {
+      const q = query.trim().toLowerCase();
+      const all = state.objects.slice().sort((a, b) =>
+        String(a.object_number).localeCompare(String(b.object_number), "ru", { numeric: true }));
+      if (!q) return all.slice(0, 50);
+      return all.filter((o) =>
+        String(o.object_number).toLowerCase().includes(q) ||
+        String(o.description ?? "").toLowerCase().includes(q)).slice(0, 50);
+    }
+
+    function close() {
+      listEl.hidden = true;
+      input.setAttribute("aria-expanded", "false");
+      activeIndex = -1;
+    }
+
+    function open() {
+      items = matches(input.value);
+      listEl.innerHTML = "";
+      if (!items.length) {
+        listEl.innerHTML = '<div class="combo__empty">Объект не найден</div>';
+      } else {
+        const q = input.value.trim().toLowerCase();
+        items.forEach((obj) => {
+          const btn = document.createElement("button");
+          btn.type = "button";
+          btn.className = "combo__item";
+          btn.setAttribute("role", "option");
+          btn.innerHTML = `
+            <span class="combo__item-num">${highlight(obj.object_number, q)}</span>
+            <span class="combo__item-desc">${highlight(obj.description || "Без описания", q)}</span>`;
+          // mousedown срабатывает раньше blur — клик по подсказке успевает выбрать
+          btn.addEventListener("mousedown", (event) => { event.preventDefault(); pick(obj); });
+          listEl.appendChild(btn);
+        });
+      }
+      listEl.hidden = false;
+      input.setAttribute("aria-expanded", "true");
+      activeIndex = -1;
+    }
+
+    function highlightActive() {
+      const els = $$(".combo__item", listEl);
+      els.forEach((el, i) => el.classList.toggle("is-active", i === activeIndex));
+      if (els[activeIndex]) els[activeIndex].scrollIntoView({ block: "nearest" });
+    }
+
+    function pick(obj) {
+      applied = obj ? obj.object_number : "";
+      input.value = applied;
+      if (clearBtn) clearBtn.hidden = !applied;
+      close();
+      onPick(obj);
+    }
+
+    input.addEventListener("input", () => {
+      if (clearBtn) clearBtn.hidden = input.value === "";
+      if (input.value.trim() === "" && applied) { pick(null); open(); return; }
+      open();
+    });
+    // открываем по клику, а не по focus: автофокус модалки не должен
+    // разворачивать список сам по себе
+    input.addEventListener("click", open);
+    input.addEventListener("blur", () => {
+      setTimeout(() => {
+        // уход без выбора — возвращаем применённое значение
+        input.value = applied;
+        if (clearBtn) clearBtn.hidden = !applied;
+        close();
+      }, 120);
+    });
+    input.addEventListener("keydown", (event) => {
+      if (listEl.hidden && (event.key === "ArrowDown" || event.key === "ArrowUp")) { open(); return; }
+      if (event.key === "ArrowDown") {
+        event.preventDefault();
+        activeIndex = Math.min(activeIndex + 1, items.length - 1);
+        highlightActive();
+      } else if (event.key === "ArrowUp") {
+        event.preventDefault();
+        activeIndex = Math.max(activeIndex - 1, 0);
+        highlightActive();
+      } else if (event.key === "Enter") {
+        event.preventDefault();
+        if (activeIndex >= 0 && items[activeIndex]) { pick(items[activeIndex]); return; }
+        const exact = state.objects.find((o) =>
+          String(o.object_number).toLowerCase() === input.value.trim().toLowerCase());
+        if (exact) pick(exact);
+        else if (items.length === 1) pick(items[0]);
+      } else if (event.key === "Escape" && !listEl.hidden) {
+        input.value = applied;
+        close();
+        event.stopPropagation(); // не закрывать модалку/панель, пока открыт список
+      }
+    });
+    if (clearBtn) clearBtn.addEventListener("click", () => { pick(null); input.focus(); });
+
+    return {
+      setValue(objectNumber) {
+        applied = objectNumber || "";
+        input.value = applied;
+        if (clearBtn) clearBtn.hidden = !applied;
+        close();
+      },
+    };
+  }
+
   function fillSelect(select, items, { value, text, placeholder, keep }) {
     const current = keep ? select.value : "";
     select.innerHTML = "";
@@ -555,6 +669,42 @@
     testsEls.moreRow.hidden = !state.testsHasMore;
   }
 
+  /* Точное количество опытов в базе: у бэка нет count-эндпоинта, поэтому
+     считаем бинарным поиском по offset дешёвыми запросами limit=1
+     (~2·log2(N) запросов даже для сотен тысяч записей). */
+  async function countTestsTotal(token) {
+    try {
+      const exists = async (offset) =>
+        (await API.getTests({ limit: 1, offset })).length > 0;
+      let lo = Math.max(state.tests.length - 1, 0); // здесь строка точно есть
+      let hi = Math.max(256, (lo + 1) * 2);
+      while (await exists(hi)) {
+        if (token !== testsFetchToken) return null;
+        lo = hi;
+        hi *= 2;
+        if (hi > 2000000) break;
+      }
+      while (lo + 1 < hi) {
+        if (token !== testsFetchToken) return null;
+        const mid = Math.floor((lo + hi) / 2);
+        if (await exists(mid)) lo = mid; else hi = mid;
+      }
+      return hi;
+    } catch (_) { return null; }
+  }
+
+  function setTestsTotal(total) {
+    if (total < 1000) {
+      countUp($("#stat-tests"), total);
+      setTabCount("tests", String(total));
+    } else {
+      // больше тысячи — пишем в тысячах: «3+ тыс»
+      const thousands = Math.floor(total / 1000);
+      $("#stat-tests").textContent = `${thousands}+ тыс`;
+      setTabCount("tests", `${thousands}+ тыс`);
+    }
+  }
+
   async function loadTests({ append = false } = {}) {
     const token = ++testsFetchToken;
     if (!append) { state.testsOffset = 0; state.tests = []; }
@@ -581,9 +731,14 @@
       renderTests();
       // Счётчики в hero и в табе — только для нефильтрованной выборки
       const unfiltered = !state.filters.objectNumber && !state.filters.boreholeName && !state.filters.testType;
-      if (unfiltered) {
-        countUp($("#stat-tests"), state.tests.length, state.testsHasMore ? "+" : "");
-        setTabCount("tests", state.tests.length + (state.testsHasMore ? "+" : ""));
+      if (unfiltered && !append) {
+        if (!state.testsHasMore) {
+          setTestsTotal(state.tests.length); // всё уже загружено — число точное
+        } else {
+          countTestsTotal(token).then((total) => {
+            if (token === testsFetchToken && total != null) setTestsTotal(total);
+          });
+        }
       }
     } catch (err) {
       if (token !== testsFetchToken) return;
@@ -594,12 +749,6 @@
   }
 
   function refreshFilterSelects() {
-    fillSelect(testsEls.fObject, state.objects, {
-      value: (o) => o.object_number,
-      text: (o) => o.description ? `${o.object_number} — ${o.description}` : o.object_number,
-      placeholder: "Все объекты",
-      keep: true,
-    });
     fillSelect(testsEls.fType, state.testTypes, {
       value: (t) => t.test_type,
       text: (t) => t.test_type,
@@ -608,13 +757,15 @@
     });
   }
 
-  testsEls.fObject.addEventListener("change", async () => {
-    state.filters.objectNumber = testsEls.fObject.value;
-    state.filters.boreholeName = "";
-    testsEls.fBorehole.innerHTML = '<option value="">Все скважины</option>';
-    testsEls.fBorehole.disabled = !state.filters.objectNumber;
-    if (state.filters.objectNumber) {
-      const obj = state.objects.find((o) => o.object_number === state.filters.objectNumber);
+  const objectCombo = createObjectCombo({
+    input: testsEls.fObject,
+    listEl: $("#f-object-combo .combo__list"),
+    clearBtn: $("#f-object-clear"),
+    onPick: async (obj) => {
+      state.filters.objectNumber = obj ? obj.object_number : "";
+      state.filters.boreholeName = "";
+      testsEls.fBorehole.innerHTML = '<option value="">Все скважины</option>';
+      testsEls.fBorehole.disabled = !obj;
       if (obj) {
         try {
           const boreholes = await boreholesFor(obj.object_id);
@@ -625,8 +776,8 @@
           });
         } catch (_) { /* нет скважин */ }
       }
-    }
-    loadTests();
+      loadTests();
+    },
   });
 
   testsEls.fBorehole.addEventListener("change", () => {
@@ -646,8 +797,8 @@
 
   $("#btn-reset-filters").addEventListener("click", () => {
     state.filters = { objectNumber: "", boreholeName: "", testType: "", search: "" };
-    testsEls.fObject.value = "";
-    testsEls.fBorehole.value = "";
+    objectCombo.setValue("");
+    testsEls.fBorehole.innerHTML = '<option value="">Все скважины</option>';
     testsEls.fBorehole.disabled = true;
     testsEls.fType.value = "";
     testsEls.fSearch.value = "";
@@ -919,7 +1070,12 @@
         <div class="form-row">
           <label class="field">
             <span class="field__label">Объект</span>
-            <select class="field__select" id="m-object"><option value="">— выберите —</option></select>
+            <span class="combo" id="m-object-combo">
+              <input type="text" class="field__input" id="m-object" placeholder="Начните вводить номер…"
+                     autocomplete="off" spellcheck="false" role="combobox"
+                     aria-expanded="false" aria-autocomplete="list" />
+              <div class="combo__list" role="listbox" hidden></div>
+            </span>
           </label>
           <label class="field">
             <span class="field__label">Скважина</span>
@@ -962,11 +1118,6 @@
     const mTimestamp = $("#m-timestamp", box);
     const mDesc = $("#m-desc", box);
 
-    fillSelect(mObject, state.objects, {
-      value: (o) => o.object_id,
-      text: (o) => o.description ? `${o.object_number} — ${o.description}` : o.object_number,
-      placeholder: "— выберите —",
-    });
     fillSelect(mType, state.testTypes, {
       value: (t) => t.test_type_id,
       text: (t) => t.test_type,
@@ -1023,13 +1174,18 @@
       }
     }
 
-    mObject.addEventListener("change", () => loadModalBoreholes(mObject.value));
+    const mObjectCombo = createObjectCombo({
+      input: mObject,
+      listEl: $("#m-object-combo .combo__list", box),
+      clearBtn: null,
+      onPick: (obj) => loadModalBoreholes(obj ? obj.object_id : ""),
+    });
     mBorehole.addEventListener("change", () => loadModalSamples(mBorehole.value));
 
     if (isEdit) {
       const obj = state.objects.find((o) => o.object_number === existing.object_number);
       if (obj) {
-        mObject.value = obj.object_id;
+        mObjectCombo.setValue(obj.object_number);
         await loadModalBoreholes(obj.object_id, existing.borehole_name);
       }
       const typeObj = state.testTypes.find((t) => t.test_type === existing.test_type);

@@ -7,6 +7,11 @@
 # ============================================================
 version: '3.8'
 
+volumes:
+  # Именованный том: база переживает полную чистку Docker
+  # (deploy.sh сносит контейнеры и образы, но тома не трогает)
+  pgdata_dev:
+
 services:
   db:
     image: postgres:13-alpine
@@ -41,6 +46,8 @@ services:
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
       - POSTGRES_DB=${POSTGRES_NAME}
       - PGDATA=/var/lib/postgresql/data/pgdata
+    volumes:
+      - pgdata_dev:/var/lib/postgresql/data
     expose:
       - 5432
     restart: unless-stopped

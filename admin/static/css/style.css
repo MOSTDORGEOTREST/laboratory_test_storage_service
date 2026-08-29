@@ -374,18 +374,15 @@ img { max-width: 100%; }
   color: var(--text-primary);
   margin-right: .4rem;
 }
+/* Эмблема без обрамляющего квадрата, крупная */
 .brand__chip {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 42px; height: 42px;
-  background: #F6F2E8;
-  border: 1px solid var(--line-soft);
-  border-radius: var(--radius-sm);
-  overflow: hidden;
+  width: 46px; height: 48px;
   flex: none;
 }
-.brand__chip img { width: 30px; height: 30px; object-fit: contain; }
+.brand__chip img { height: 46px; width: auto; object-fit: contain; }
 .brand__name {
   font-family: var(--font-d);
   font-weight: 600;
@@ -723,6 +720,7 @@ img { max-width: 100%; }
   line-height: 1.1;
   font-variant-numeric: tabular-nums;
   color: var(--amber);
+  white-space: nowrap; /* «3+ тыс» не должно переноситься */
 }
 .hero-stat__label {
   font-family: var(--font-m);
@@ -782,6 +780,71 @@ img { max-width: 100%; }
 .toolbar .field { min-width: 150px; flex: 1 1 150px; }
 .toolbar .field--wide { flex: 2 1 220px; }
 .toolbar__actions { display: flex; gap: .6rem; margin-left: auto; }
+
+/* ---------- Комбобокс (объект: ввод с подсказками) ---------- */
+.combo { position: relative; display: block; }
+.combo .field__input { padding-right: 2.4rem; }
+.combo__clear {
+  position: absolute;
+  right: .5rem; top: 50%;
+  transform: translateY(-50%);
+  width: 28px; height: 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: var(--radius-pill);
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: color .2s var(--ease), background-color .2s var(--ease);
+}
+.combo__clear:hover { color: var(--accent); background: var(--accent-soft); }
+.combo__list {
+  position: absolute;
+  z-index: 60;
+  top: calc(100% + 6px);
+  left: 0; right: 0;
+  max-height: 264px;
+  overflow-y: auto;
+  background: var(--surface-elevated);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-card-hover);
+  padding: .35rem;
+}
+.combo__item {
+  display: block;
+  width: 100%;
+  text-align: left;
+  background: transparent;
+  border: none;
+  border-radius: 9px;
+  padding: .5rem .75rem;
+  cursor: pointer;
+  font-family: var(--font-s);
+}
+.combo__item:hover, .combo__item.is-active { background: var(--accent-soft); }
+.combo__item-num {
+  font-family: var(--font-m);
+  font-size: .85rem;
+  font-weight: 500;
+  color: var(--text-primary);
+  font-variant-numeric: tabular-nums;
+}
+.combo__item-desc {
+  display: block;
+  font-size: .76rem;
+  color: var(--text-secondary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.combo__empty {
+  padding: .6rem .75rem;
+  font-size: .8rem;
+  color: var(--text-muted);
+}
 
 .search-wrap { position: relative; }
 .search-wrap svg {

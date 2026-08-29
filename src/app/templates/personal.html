@@ -54,7 +54,15 @@
     <div class="card toolbar no-print">
       <label class="field">
         <span class="field__label">Объект</span>
-        <select class="field__select" id="f-object"><option value="">Все объекты</option></select>
+        <span class="combo" id="f-object-combo">
+          <input type="text" class="field__input" id="f-object" placeholder="Номер объекта…"
+                 autocomplete="off" spellcheck="false" role="combobox"
+                 aria-expanded="false" aria-autocomplete="list" aria-label="Фильтр по объекту" />
+          <button type="button" class="combo__clear" id="f-object-clear" hidden aria-label="Сбросить объект">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M18 6L6 18M6 6l12 12"/></svg>
+          </button>
+          <div class="combo__list" role="listbox" hidden></div>
+        </span>
       </label>
       <label class="field">
         <span class="field__label">Скважина</span>
