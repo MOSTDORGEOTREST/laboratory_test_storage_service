@@ -1,0 +1,59 @@
+# ============================================================
+# ТЕСТОВЫЙ стек — ЕДИНСТВЕННОЕ место, где база очищается.
+# MODE=test + ALLOW_DB_DROP=1 (оба флага обязательны — двойной
+# предохранитель). НИКОГДА не указывайте здесь боевую DATABASE_URL.
+# Запуск тестов:
+#   docker compose -f docker-compose.test.yml up -d
+#   docker compose -f docker-compose.test.yml exec web pytest . -v
+# ============================================================
+version: '3.8'
+
+services:
+  db:
+    image: postgres:13-alpine
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_NAME}
+      - PGDATA=/var/lib/postgresql/data/pgdata
+    expose:
+      - 5432
+    restart: unless-stopped
+
+  redis:
+    image: "redis:alpine"
+    expose:
+      - 6379
+    ports:
+      - "6379:6379"
+    restart: always
+    environment:
+      - REDIS_REPLICATION_MODE=master
+
+  web:
+    build: ./src
+    command: bash -c 'while !</dev/tcp/db/5432; do sleep 15; done; uvicorn main:app --host 0.0.0.0'
+    environment:
+      - MODE=test
+      - ALLOW_DB_DROP=1   # без этого флага даже MODE=test не тронет базу
+      - DATABASE_URL=postgresql+asyncpg://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_NAME}
+      - JWT_SECRET=${JWT_SECRET}
+      - JWT_ALGORITHM=${JWT_ALGORITHM}
+      - JWT_EXPIRATION=${JWT_EXPIRATION}
+      - SUPERUSER_NAME=${SUPERUSER_NAME}
+      - SUPERUSER_PASSWORD=${SUPERUSER_PASSWORD}
+      - AWS_URI=${AWS_URI}
+      - AWS_ACCCESS_KEY=${AWS_ACCCESS_KEY}
+      - AWS_SERVICE_NAME=${AWS_SERVICE_NAME}
+      - AWS_SECRET_KEY=${AWS_SECRET_KEY}
+      - AWS_REGION=${AWS_REGION}
+      - AWS_BUCKET=${AWS_BUCKET}
+    ports:
+      - 8000:8000
+    restart: always
+    volumes:
+      - /etc/timezone:/etc/timezone:ro
+      - /etc/localtime:/etc/localtime:ro
+    depends_on:
+      - redis
+      - db

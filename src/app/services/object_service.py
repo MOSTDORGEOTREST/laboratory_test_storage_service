@@ -239,7 +239,8 @@ class ObjectService:
        '''
         try:
             # Обновление объекта
-            if data.get('object', default=None):
+            # (dict.get не принимает keyword-аргумент default — это роняло эндпоинт с TypeError)
+            if data.get('object'):
                 stmt_object = update(
                     tables.Objects
                 ).where(
@@ -251,7 +252,7 @@ class ObjectService:
                 await self.session.execute(stmt_object)
 
             # Обновление всех скважин
-            if data.get('boreholes', default=None):
+            if data.get('boreholes'):
                 for borehole in data['boreholes']:
                     stmt_borehole = update(
                         tables.Boreholes
@@ -263,19 +264,8 @@ class ObjectService:
                     stmt_borehole.execution_options(synchronize_session="fetch")
                     await self.session.execute(stmt_borehole)
 
-                stmt_borehole = insert(tables.Boreholes).values(
-                    **borehole
-                )
-
-                stmt_borehole = stmt_borehole.on_conflict_do_update(
-                    index_elements=['borehole_id'],
-                    set_=stmt_borehole.excluded
-                )
-
-                await self.session.execute(stmt_object)
-
             # Обновление всех образцов
-            if data.get('samples', default=None):
+            if data.get('samples'):
                 for sample in data['samples']:
                     stmt_sample = update(
                         tables.Samples

@@ -1,0 +1,95 @@
+# ============================================================
+# LTS: общий сервер с админкой (control plane)
+# Запуск:  docker compose -f admin/docker-compose.admin.yml up -d
+# Перед запуском: заполнить .env (см. .env.example) и собрать образ LTS:
+#   docker build -t lts:latest ./src
+# DNS: wildcard-запись *.<DOMAIN> -> IP этого сервера (одна, навсегда)
+# ============================================================
+
+networks:
+  lts:
+    name: lts_default   # то же имя указано в DOCKER_NETWORK админки
+
+volumes:
+  pgdata:
+  letsencrypt:
+
+services:
+  traefik:
+    image: traefik:v3.1
+    restart: unless-stopped
+    command:
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.websecure.address=:443"
+      # авто-редирект http -> https
+      - "--entrypoints.web.http.redirections.entrypoint.to=websecure"
+      - "--entrypoints.web.http.redirections.entrypoint.scheme=https"
+      # Let's Encrypt (HTTP-01; для wildcard-сертификата нужен DNS-01 у вашего DNS-провайдера)
+      - "--certificatesresolvers.le.acme.email=${ACME_EMAIL}"
+      - "--certificatesresolvers.le.acme.storage=/letsencrypt/acme.json"
+      - "--certificatesresolvers.le.acme.httpchallenge.entrypoint=web"
+    ports:
+      - "80:80"
+      - "443:443"
+    networks: [lts]
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - letsencrypt:/letsencrypt
+
+  postgres:
+    image: postgres:13-alpine
+    restart: unless-stopped
+    environment:
+      - POSTGRES_USER=${PG_ADMIN_USER}
+      - POSTGRES_PASSWORD=${PG_ADMIN_PASSWORD}
+      - PGDATA=/var/lib/postgresql/data/pgdata
+    networks: [lts]
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    # порт наружу НЕ публикуем — только внутренняя сеть
+
+  redis:
+    image: redis:alpine
+    restart: unless-stopped
+    networks: [lts]
+
+  admin:
+    build: .
+    restart: unless-stopped
+    environment:
+      - ADMIN_USERNAME=${ADMIN_USERNAME}
+      - ADMIN_PASSWORD=${ADMIN_PASSWORD}
+      - ADMIN_JWT_SECRET=${ADMIN_JWT_SECRET}
+      - DOMAIN=${DOMAIN}
+      - LTS_IMAGE=${LTS_IMAGE:-lts:latest}
+      - DOCKER_NETWORK=lts_default
+      - PG_HOST=postgres
+      - PG_PORT=5432
+      - PG_ADMIN_USER=${PG_ADMIN_USER}
+      - PG_ADMIN_PASSWORD=${PG_ADMIN_PASSWORD}
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - AWS_URI=${AWS_URI}
+      - AWS_ACCCESS_KEY=${AWS_ACCCESS_KEY}
+      - AWS_SERVICE_NAME=${AWS_SERVICE_NAME}
+      - AWS_SECRET_KEY=${AWS_SECRET_KEY}
+      - AWS_REGION=${AWS_REGION}
+      - AWS_BUCKET=${AWS_BUCKET}
+    networks: [lts]
+    volumes:
+      # Доступ к Docker — это root на сервере: admin.<DOMAIN> держать за VPN/allowlist!
+      - /var/run/docker.sock:/var/run/docker.sock
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.admin.rule=Host(`admin.${DOMAIN}`)"
+      - "traefik.http.routers.admin.entrypoints=websecure"
+      - "traefik.http.routers.admin.tls.certresolver=le"
+      - "traefik.http.services.admin.loadbalancer.server.port=8100"
+      # Пример allowlist по IP (раскомментировать и вписать свои сети):
+      # - "traefik.http.middlewares.admin-ip.ipallowlist.sourcerange=10.0.0.0/8,203.0.113.5/32"
+      # - "traefik.http.routers.admin.middlewares=admin-ip"
+    depends_on:
+      - postgres
+      - traefik

@@ -107,6 +107,10 @@ class TestService:
                 isouter=True
             ).
             filter(*filters).
+            # Стабильный порядок обязателен для корректной пагинации (limit/offset):
+            # без ORDER BY Postgres не гарантирует порядок, и страницы могут
+            # пересекаться или терять строки. Используется индекс ix_tests_timestamp.
+            order_by(tables.Tests.timestamp.desc(), tables.Tests.test_id.desc()).
             offset(offset).
             limit(limit)
         )
@@ -164,8 +168,10 @@ class TestService:
         if data.get("test_type_id", None):
             await self._get_test_type(test_data.test_type_id)
 
-        test_params = test.test_params
-        test_results = test.test_results
+        # У существующих записей params/results могут быть NULL —
+        # без "or {}" вызов .update() на None ронял запрос с 500
+        test_params = test.test_params or {}
+        test_results = test.test_results or {}
 
         if data.get("test_params", None):
             test_params.update(data["test_params"])

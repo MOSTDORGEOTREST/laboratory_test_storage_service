@@ -51,11 +51,21 @@
 
 2. Скопировать файл .env в /root/laboratory_test_storage_service
 
-3. Запуск через скрипт:\
+3. Запуск ПРОД (web + nginx; Postgres/Redis/S3 — внешние, из .env):\
+    `docker-compose up`
+
+   Локальный дев-стек (свои Postgres и Redis; база НЕ очищается):\
     `docker-compose -f docker-compose-dev.yml up`
 
-4. Запуск тестов:\
-    `docker-compose exec web pytest . -v`
+4. Запуск тестов — ТОЛЬКО через тестовый стек (он единственный чистит базу,
+   для этого нужны сразу два флага: MODE=test и ALLOW_DB_DROP=1):\
+    `docker-compose -f docker-compose.test.yml up -d`\
+    `docker-compose -f docker-compose.test.yml exec web pytest . -v`
+
+> Безопасность данных: приложение никогда не удаляет таблицы само по себе —
+> на старте выполняется только create_all (создание недостающих).
+> Очистка БД требует ОДНОВРЕМЕННО MODE=test и ALLOW_DB_DROP=1;
+> ни прод-, ни дев-compose эти флаги не передают.
 
 
 Для очищения докера от проекта:\

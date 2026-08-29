@@ -2,37 +2,41 @@
 <html lang="ru">
   <head>
     <meta charset="UTF-8" />
-    <meta
-      name="viewport"
-      content="width=device-width, initial-scale=1, shrink-to-fit=no"
-    />
-    <meta name="theme-color" content="#0f766e" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <meta name="theme-color" content="#111826" />
     <meta name="LTS" content="Laboratory tests storage" />
 
     <link rel="icon" href="/static/images/page.png" />
     <link rel="apple-touch-icon" href="/static/images/page.png" />
 
-    <title>LTS — Лабораторные испытания</title>
+    <title>MDGT · LTS — Хранилище лабораторных испытаний</title>
 
     <meta
       name="description"
       content="Сервис для хранения результатов лабораторных испытаний грунтов."
     />
 
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap"
-      rel="stylesheet"
-    />
+    <link rel="preload" href="/static/css/fonts/unbounded-cyrillic-800-normal.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="/static/css/fonts/inter-cyrillic-400-normal.woff2" as="font" type="font/woff2" crossorigin />
 
     <link rel="stylesheet" type="text/css" href="/static/css/style.css" />
   </head>
-  <body class="body" id="body">
-    <div class="wrapper">
-      {% block header %}{% endblock %}
-      <main class="container">{% block content %}{% endblock %}</main>
-    </div>
+  <body id="body">
+    {% block header %}{% endblock %}
+    <main>{% block content %}{% endblock %}</main>
+
+    <footer class="footer no-print">
+      <div class="wrap footer__inner">
+        <span class="footer__copy">© МОСТДОРГЕОТРЕСТ · Лабораторная база</span>
+        <a class="dev-link" href="http://mdgt.ru" target="_blank" rel="noopener" aria-label="Разработчик — МОСТДОРГЕОТРЕСТ, mdgt.ru">
+          <span class="dev-link__chip"><img src="/static/images/mdgt.png" alt="МОСТДОРГЕОТРЕСТ" /></span>
+          <span>Разработка · МОСТДОРГЕОТРЕСТ · mdgt.ru</span>
+        </a>
+        <span class="footer__slogan">soil · test · store</span>
+      </div>
+    </footer>
+
+    <div class="toasts" id="toasts" aria-live="polite"></div>
 
     <script src="/static/js/requests.js"></script>
     <script src="/static/js/app.js"></script>

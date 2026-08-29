@@ -5,36 +5,53 @@
 {% block content %}
 <div class="auth-page">
   <div class="auth-card">
-    <div class="auth-card__brand">
-      <img src="/static/images/logo.png" alt="" class="auth-card__logo" />
-      <h1 class="auth-card__title">Вход в систему</h1>
-      <p class="auth-card__subtitle">Сервис хранения результатов лабораторных испытаний грунтов</p>
+    <span class="strat" aria-hidden="true"></span>
+    <div class="cascade">
+      <p class="eyebrow"><span class="live-dot" aria-hidden="true"></span>MDGT · Laboratory base</p>
+      <h1 class="auth-card__title">Хранилище <span class="grad-text">испытаний</span> грунтов</h1>
+      <p class="auth-card__lead">
+        Объекты, скважины, образцы, протоколы опытов и файлы отчётов —
+        в одной инженерной базе.
+      </p>
+      <form action="" class="auth-form" id="login-form" novalidate>
+        <label class="field">
+          <span class="field__label">Имя пользователя</span>
+          <input
+            type="text"
+            autocomplete="username"
+            class="field__input"
+            placeholder="username"
+            id="username"
+            name="username"
+            required
+          />
+        </label>
+        <label class="field">
+          <span class="field__label">Пароль</span>
+          <input
+            type="password"
+            autocomplete="current-password"
+            class="field__input"
+            placeholder="••••••••"
+            id="password"
+            name="password"
+            required
+          />
+        </label>
+        <p class="auth-error" id="auth-error" hidden>
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
+          <span>Неверное имя пользователя или пароль</span>
+        </p>
+        <button type="submit" class="btn btn--primary btn--glow btn--block" id="login-submit">
+          Войти в систему
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </button>
+      </form>
+      <div class="auth-card__foot">
+        <span>jwt · postgres · s3</span>
+        <a href="http://mdgt.ru" target="_blank" rel="noopener">mdgt.ru</a>
+      </div>
     </div>
-    <form action="" class="auth-form" id="login-form">
-      <label class="field">
-        <span class="field__label">Имя пользователя</span>
-        <input
-          type="text"
-          autocomplete="username"
-          class="field__input"
-          placeholder="username"
-          id="username"
-          name="username"
-        />
-      </label>
-      <label class="field">
-        <span class="field__label">Пароль</span>
-        <input
-          type="password"
-          autocomplete="current-password"
-          class="field__input"
-          placeholder="••••••••"
-          id="password"
-          name="password"
-        />
-      </label>
-      <button type="submit" class="btn btn--primary btn--block">Войти</button>
-    </form>
   </div>
 </div>
 {% endblock %}

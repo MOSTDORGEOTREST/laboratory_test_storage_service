@@ -44,7 +44,7 @@ class LimitUploadSizeMiddleware(BaseHTTPMiddleware):
         self.max_upload_size = max_upload_size
 
     async def dispatch(self, request, call_next):
-        if request.method == "POST" and request.url.path == "/files/":
+        if request.method == "POST" and request.url.path == "/tests/files/":
             content_length = request.headers.get("content-length")
             if content_length and int(content_length) > self.max_upload_size:
                 return Response("Request entity too large", status_code=413)
@@ -127,9 +127,14 @@ async def startup_event():
     FastAPICache.init(RedisBackend(redis), prefix="fastapi-cache")
 
     async with engine.begin() as conn:
-        if configs.mode == 'test':
+        # ВНИМАНИЕ: очистка БД возможна ТОЛЬКО при MODE=test И явном
+        # ALLOW_DB_DROP=1 одновременно (двойной предохранитель).
+        # Сам по себе MODE=test базу больше НЕ стирает.
+        if configs.mode == 'test' and configs.allow_db_drop:
             await conn.run_sync(Base.metadata.drop_all)
 
+        # Прод-поведение: только создание недостающих таблиц,
+        # существующие таблицы и данные не затрагиваются никогда.
         await conn.run_sync(Base.metadata.create_all)
 
 

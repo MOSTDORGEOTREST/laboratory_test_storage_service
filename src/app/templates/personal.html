@@ -1,102 +1,224 @@
 {% extends 'base.html' %}
 {% block header %}
+{% set is_app = true %}
 {% include 'header.html' %}
 {% endblock %}
 {% block content %}
 
 <script id="objects-data" type="application/json">{{ objects_json | safe }}</script>
 
-<div class="dashboard" id="dashboard">
-  <aside class="panel panel--objects" aria-label="Список объектов">
-    <header class="panel__header">
-      <div class="panel__title-row">
-        <h2 class="panel__title">Объекты</h2>
-        <span class="badge" id="objects-count" aria-live="polite">0</span>
-      </div>
-      <div class="panel__toolbar">
-        <label class="search-field">
-          <span class="search-field__icon" aria-hidden="true">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3-3"/></svg>
-          </span>
-          <input type="search" id="objects-search" class="search-field__input" placeholder="Поиск по номеру, описанию, ID…" autocomplete="off" />
-        </label>
-        <select id="objects-sort" class="select-control" aria-label="Сортировка объектов">
-          <option value="number-asc">Номер ↑</option>
-          <option value="number-desc">Номер ↓</option>
-          <option value="desc-asc">Описание А–Я</option>
-          <option value="desc-desc">Описание Я–А</option>
-        </select>
-      </div>
-    </header>
-    <div class="panel__body">
-      <ul class="entity-list" id="objects-list" role="listbox" aria-label="Объекты"></ul>
-      <p class="empty-state" id="objects-empty" hidden>Ничего не найдено</p>
-    </div>
-  </aside>
+<div class="app wrap" id="app">
 
-  <section class="panel panel--tests" aria-label="Список опытов">
-    <header class="panel__header">
-      <div class="panel__title-row">
-        <h2 class="panel__title">Опыты</h2>
-        <span class="badge" id="tests-count" aria-live="polite">0</span>
-      </div>
-      <p class="panel__subtitle" id="tests-subtitle">Выберите объект</p>
-      <div class="panel__toolbar">
-        <label class="search-field">
-          <span class="search-field__icon" aria-hidden="true">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3-3"/></svg>
-          </span>
-          <input type="search" id="tests-search" class="search-field__input" placeholder="Поиск по ID, скважине, л/н, типу…" autocomplete="off" disabled />
-        </label>
-        <select id="tests-sort" class="select-control" aria-label="Сортировка опытов" disabled>
-          <option value="date-desc">Сначала новые</option>
-          <option value="date-asc">Сначала старые</option>
-          <option value="type-asc">Тип опыта А–Я</option>
-          <option value="lab-asc">Л/Н ↑</option>
-        </select>
-      </div>
-    </header>
-    <div class="panel__body">
-      <div class="loading-state" id="tests-loading" hidden>
-        <span class="spinner" aria-hidden="true"></span>
-        <span>Загрузка опытов…</span>
-      </div>
-      <ul class="entity-list" id="tests-list" role="listbox" aria-label="Опыты"></ul>
-      <p class="empty-state" id="tests-empty" hidden>Нет опытов по выбранному объекту</p>
-      <p class="empty-state empty-state--hint" id="tests-hint">Выберите объект слева, чтобы увидеть опыты</p>
-    </div>
-  </section>
-
-  <section class="panel panel--detail" aria-label="Результаты и файлы">
-    <header class="panel__header">
-      <div class="panel__title-row">
-        <h2 class="panel__title">Детали опыта</h2>
-      </div>
-      <p class="panel__subtitle" id="detail-subtitle">Выберите опыт</p>
-    </header>
-    <div class="panel__body panel__body--detail">
-      <div class="detail-grid" id="detail-content" hidden>
-        <div class="detail-card">
-          <h3 class="detail-card__title">Параметры</h3>
-          <dl class="kv-list" id="params-list"></dl>
+  <!-- Тёмный hero со сводкой -->
+  <section class="hero-card no-print" aria-label="Сводка">
+    <div class="cascade">
+      <p class="eyebrow"><span class="live-dot" aria-hidden="true"></span>MDGT · Лабораторная база</p>
+      <div class="hero-card__row">
+        <div>
+          <h1 class="hero-card__title">Хранилище <span class="grad-text">испытаний</span></h1>
+          <p class="hero-card__lead">Результаты лабораторных испытаний грунтов: объекты, скважины, образцы, протоколы и файлы отчётов.</p>
         </div>
-        <div class="detail-card">
-          <h3 class="detail-card__title">Результаты</h3>
-          <dl class="kv-list" id="results-list"></dl>
-        </div>
-        <div class="detail-card detail-card--files">
-          <h3 class="detail-card__title">Файлы</h3>
-          <ul class="file-list" id="files-list"></ul>
-          <p class="empty-state empty-state--compact" id="files-empty" hidden>Файлов нет</p>
-          <div class="loading-state loading-state--inline" id="files-loading" hidden>
-            <span class="spinner" aria-hidden="true"></span>
-            <span>Загрузка…</span>
+        <div class="hero-stats">
+          <div class="hero-stat">
+            <div class="hero-stat__num" id="stat-objects" data-count>0</div>
+            <div class="hero-stat__label">объектов</div>
+          </div>
+          <div class="hero-stat">
+            <div class="hero-stat__num" id="stat-tests" data-count>0</div>
+            <div class="hero-stat__label">опытов</div>
+          </div>
+          <div class="hero-stat">
+            <div class="hero-stat__num" id="stat-types" data-count>0</div>
+            <div class="hero-stat__label">типов испытаний</div>
           </div>
         </div>
       </div>
-      <p class="empty-state empty-state--hint" id="detail-hint">Выберите опыт, чтобы увидеть параметры, результаты и файлы</p>
     </div>
   </section>
+
+  <!-- ======================= ВИД: ОПЫТЫ ======================= -->
+  <section class="view" id="view-tests" aria-label="Опыты">
+    <div class="view-head">
+      <div>
+        <p class="eyebrow eyebrow--paper">Раздел 01</p>
+        <h2>Опыты <span class="count-badge" id="tests-count">0</span></h2>
+      </div>
+      <div class="view-head__meta">
+        <button type="button" class="btn btn--primary" id="btn-new-test">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+          Новый опыт
+        </button>
+      </div>
+    </div>
+
+    <div class="card toolbar no-print">
+      <label class="field">
+        <span class="field__label">Объект</span>
+        <select class="field__select" id="f-object"><option value="">Все объекты</option></select>
+      </label>
+      <label class="field">
+        <span class="field__label">Скважина</span>
+        <select class="field__select" id="f-borehole" disabled><option value="">Все скважины</option></select>
+      </label>
+      <label class="field">
+        <span class="field__label">Тип испытания</span>
+        <select class="field__select" id="f-type"><option value="">Все типы</option></select>
+      </label>
+      <label class="field field--wide">
+        <span class="field__label">Поиск</span>
+        <span class="search-wrap">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3-3"/></svg>
+          <input type="search" class="field__input" id="f-search" placeholder="Л/н, грунт, ID, дата…" autocomplete="off" />
+        </span>
+      </label>
+      <div class="toolbar__actions">
+        <button type="button" class="btn btn--ghost" id="btn-reset-filters">Сбросить</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="loading-state" id="tests-loading" hidden>
+        <span class="spinner" aria-hidden="true"></span><span>Загрузка опытов…</span>
+      </div>
+      <div class="table-scroll">
+        <table class="data-table data-table--tests" id="tests-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Дата</th>
+              <th>Объект</th>
+              <th>Скважина</th>
+              <th>Лаб. номер</th>
+              <th>Грунт</th>
+              <th>Тип испытания</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="tests-tbody"></tbody>
+        </table>
+      </div>
+      <div class="empty-state" id="tests-empty" hidden>
+        <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M9 3h6l1 7h-8zM7 10h10l2 11H5z"/></svg>
+        <span id="tests-empty-text">Опытов не найдено</span>
+      </div>
+      <div class="load-more-row" id="tests-more-row" hidden>
+        <button type="button" class="btn btn--ghost" id="btn-tests-more">Показать ещё</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ======================= ВИД: ОБЪЕКТЫ ======================= -->
+  <section class="view" id="view-objects" aria-label="Объекты" hidden>
+    <div class="view-head">
+      <div>
+        <p class="eyebrow eyebrow--paper">Раздел 02</p>
+        <h2>Объекты · скважины · образцы</h2>
+      </div>
+      <div class="view-head__meta">
+        <button type="button" class="btn btn--primary" id="btn-new-object">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+          Новый объект
+        </button>
+      </div>
+    </div>
+
+    <div class="browse-grid">
+      <!-- Объекты -->
+      <div class="card browse-col" aria-label="Объекты">
+        <div class="browse-col__head">
+          <span class="browse-col__title">Объекты <span class="count-badge" id="objects-count">0</span></span>
+        </div>
+        <div class="browse-col__search">
+          <span class="search-wrap">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3-3"/></svg>
+            <input type="search" class="field__input" id="objects-search" placeholder="Номер, описание, ID…" autocomplete="off" />
+          </span>
+        </div>
+        <div class="browse-col__body">
+          <ul class="entity-list" id="objects-list"></ul>
+          <div class="empty-state empty-state--compact" id="objects-empty" hidden>Объектов нет</div>
+        </div>
+      </div>
+
+      <!-- Скважины -->
+      <div class="card browse-col" aria-label="Скважины">
+        <div class="browse-col__head">
+          <span class="browse-col__title">Скважины <span class="count-badge" id="boreholes-count">0</span></span>
+          <button type="button" class="btn btn--ghost btn--sm" id="btn-new-borehole" disabled>+ Добавить</button>
+        </div>
+        <div class="browse-col__body">
+          <div class="loading-state" id="boreholes-loading" hidden>
+            <span class="spinner" aria-hidden="true"></span><span>Загрузка…</span>
+          </div>
+          <ul class="entity-list" id="boreholes-list"></ul>
+          <div class="empty-state empty-state--compact" id="boreholes-empty" hidden>Выберите объект слева</div>
+        </div>
+      </div>
+
+      <!-- Образцы -->
+      <div class="card browse-col browse-col--samples" aria-label="Образцы">
+        <div class="browse-col__head">
+          <span class="browse-col__title">Образцы <span class="count-badge" id="samples-count">0</span></span>
+          <button type="button" class="btn btn--ghost btn--sm" id="btn-new-sample" disabled>+ Добавить</button>
+        </div>
+        <div class="browse-col__body">
+          <div class="loading-state" id="samples-loading" hidden>
+            <span class="spinner" aria-hidden="true"></span><span>Загрузка…</span>
+          </div>
+          <ul class="entity-list" id="samples-list"></ul>
+          <div class="empty-state empty-state--compact" id="samples-empty" hidden>Выберите скважину</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ======================= ВИД: ТИПЫ ИСПЫТАНИЙ ======================= -->
+  <section class="view" id="view-types" aria-label="Типы испытаний" hidden>
+    <div class="view-head">
+      <div>
+        <p class="eyebrow eyebrow--paper">Раздел 03</p>
+        <h2>Типы испытаний <span class="count-badge" id="types-count">0</span></h2>
+      </div>
+      <div class="view-head__meta">
+        <button type="button" class="btn btn--primary" id="btn-new-type">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+          Новый тип
+        </button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="loading-state" id="types-loading" hidden>
+        <span class="spinner" aria-hidden="true"></span><span>Загрузка…</span>
+      </div>
+      <div class="table-scroll">
+        <table class="data-table data-table--types" id="types-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Тип испытания</th>
+              <th>Описание</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="types-tbody"></tbody>
+        </table>
+      </div>
+      <div class="empty-state" id="types-empty" hidden>Типов испытаний пока нет</div>
+    </div>
+  </section>
+</div>
+
+<!-- Панель деталей опыта -->
+<div class="detail-root no-print" id="detail-root" aria-hidden="true">
+  <div class="modal-scrim" data-close-detail></div>
+  <aside class="detail-panel" role="dialog" aria-modal="true" aria-label="Детали опыта" id="detail-panel"></aside>
+</div>
+
+<!-- Модальные окна -->
+<div class="modal-root no-print" id="modal-root" aria-hidden="true">
+  <div class="modal-scrim" data-close-modal></div>
+  <div class="modal" role="dialog" aria-modal="true" id="modal-box"></div>
 </div>
 
 {% endblock %}

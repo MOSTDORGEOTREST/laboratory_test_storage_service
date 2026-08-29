@@ -12,7 +12,9 @@ from app import engine, Base
 @pytest.fixture(scope="session", autouse=True)
 async def setup_db():
     async with engine.begin() as conn:
-        if configs.mode =='test':
+        # Двойной предохранитель: тесты чистят базу только при MODE=test
+        # И явном ALLOW_DB_DROP=1 (см. docker-compose.test.yml)
+        if configs.mode == 'test' and configs.allow_db_drop:
             await conn.run_sync(Base.metadata.drop_all)
             await conn.run_sync(Base.metadata.create_all)
 

@@ -1,10 +1,58 @@
-<header class="navbar">
-  <nav class="container-fluid">
-    <a href="/" class="navbar-brand">
-      <img class="navbar-brand__icon" src="/static/images/logo.png" alt="LTS" />
-      <span class="navbar-brand__text">Laboratory Tests Storage</span>
+<header class="navbar no-print" id="navbar">
+  <nav class="wrap navbar__inner">
+    <a href="/" class="brand" aria-label="MDGT LTS — на главную">
+      <span class="brand__chip"><img src="/static/images/logo.png" alt="MDGT" /></span>
+      <span>
+        <span class="brand__name">MDGT&nbsp;·&nbsp;LTS</span><br />
+        <span class="brand__sub">laboratory storage</span>
+      </span>
     </a>
 
-    <button type="button" class="btn btn--ghost" id="log-out">Выйти</button>
+    {% if is_app %}
+    <div class="nav-tabs app-only" role="tablist" aria-label="Разделы">
+      <button type="button" class="nav-tab is-active" data-view="tests" role="tab">Опыты<em data-tab-count="tests"></em></button>
+      <button type="button" class="nav-tab" data-view="objects" role="tab">Объекты<em data-tab-count="objects"></em></button>
+      <button type="button" class="nav-tab" data-view="types" role="tab">Типы<em data-tab-count="types"></em></button>
+    </div>
+    {% endif %}
+
+    <span class="navbar__spacer"></span>
+
+    {% if is_app %}
+    <span class="user-chip app-only" id="user-chip" hidden>
+      <span class="live-dot" aria-hidden="true"></span>
+      <span id="user-name">—</span>
+    </span>
+
+    <button type="button" class="btn btn--ghost btn--sm app-only" id="nav-logout" hidden>
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5M21 12H9"/></svg>
+      Выйти
+    </button>
+
+    <button type="button" class="burger app-only" id="burger" aria-label="Открыть меню" aria-expanded="false" hidden>
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+    </button>
+    {% endif %}
   </nav>
 </header>
+
+{% if is_app %}
+<div class="nav-drawer no-print" id="nav-drawer" aria-hidden="true">
+  <div class="nav-drawer__scrim" data-close-drawer></div>
+  <div class="nav-drawer__panel" role="dialog" aria-label="Меню">
+    <div class="nav-drawer__top">
+      <span class="eyebrow eyebrow--paper">Меню</span>
+      <button type="button" class="icon-btn" data-close-drawer aria-label="Закрыть меню">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M18 6L6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <button type="button" class="nav-tab" data-view="tests">Опыты</button>
+    <button type="button" class="nav-tab" data-view="objects">Объекты</button>
+    <button type="button" class="nav-tab" data-view="types">Типы испытаний</button>
+    <div class="nav-drawer__bottom">
+      <span class="user-chip"><span class="live-dot" aria-hidden="true"></span><span id="user-name-mobile">—</span></span>
+      <button type="button" class="btn btn--ghost" id="nav-logout-mobile">Выйти</button>
+    </div>
+  </div>
+</div>
+{% endif %}

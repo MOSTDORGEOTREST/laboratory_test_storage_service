@@ -17,13 +17,16 @@ class Test(TestBase):
         from_attributes = True  # Разрешает создание объектов на основе ORM или других объектов с атрибутами
 
 class TestFullView(BaseModel):
+    # Поля из JOIN-ов сделаны Optional: у исторических данных связь может быть
+    # неполной (osiротевшие записи), и одна такая строка не должна ронять
+    # весь список валидационной ошибкой 500.
     test_id: int = Field(..., description="Уникальный идентификатор теста")
-    object_number: str = Field(..., description="Идентификатор объекта, связанного с тестом")
-    borehole_name: str = Field(..., description="Название скважины, из которой был взят образец")
-    laboratory_number: str = Field(..., description="Уникальный лабораторный номер, присвоенный образцу")
-    soil_type: str = Field(..., description="Тип почвы для образца")
-    test_type: str = Field(..., description="Тип проведенного теста")
-    timestamp: datetime = Field(..., description="Время проведения теста")
+    object_number: Optional[str] = Field(None, description="Идентификатор объекта, связанного с тестом")
+    borehole_name: Optional[str] = Field(None, description="Название скважины, из которой был взят образец")
+    laboratory_number: Optional[str] = Field(None, description="Уникальный лабораторный номер, присвоенный образцу")
+    soil_type: Optional[str] = Field(None, description="Тип почвы для образца")
+    test_type: Optional[str] = Field(None, description="Тип проведенного теста")
+    timestamp: Optional[datetime] = Field(None, description="Время проведения теста")
     test_params: Optional[Dict[str, Any]] = Field(None, description="Опциональный словарь, содержащий параметры теста")
     test_results: Optional[Dict[str, Any]] = Field(None, description="Опциональный словарь, содержащий результаты теста")
     description: Optional[str] = Field(None, description="Опциональное описание теста")

@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, Response, status, UploadFile
+from fastapi import APIRouter, Depends, HTTPException, Response, status, UploadFile
 from typing import List, Optional
 from fastapi_cache.decorator import cache
 
@@ -69,6 +69,13 @@ async def delete_test(
     s3_service = uow['s3_service']
     file_service = uow['file_service']
 
+    # Получение ключей файлов ДО удаления записей из БД
+    try:
+        files = await file_service.get_test_files(test_id)
+        keys = [file.key for file in files]
+    except HTTPException:
+        keys = []
+
     # Удаление файлов из БД
     await file_service.delete_files(test_id)
 
@@ -76,9 +83,8 @@ async def delete_test(
     await service.delete(test_id=test_id)
 
     # Удаление файлов из объектного хранилища
-    files = await file_service.get_test_files(test_id)
-    for file in files:
-        await s3_service.delete(file.key)
+    for key in keys:
+        await s3_service.delete(key)
 
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
@@ -125,12 +131,17 @@ async def delete_files(
     s3_service = uow['s3_service']
     file_service = uow['file_service']
 
+    # Получение ключей файлов ДО удаления записей из БД
+    try:
+        files = await file_service.get_test_files(test_id)
+        keys = [file.key for file in files]
+    except HTTPException:
+        keys = []
+
     await file_service.delete_files(test_id)
 
-    files = await file_service.get_test_files(test_id)
-
-    for file in files:
-        await s3_service.delete(file.key)
+    for key in keys:
+        await s3_service.delete(key)
 
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
@@ -144,9 +155,12 @@ async def delete_file(
     s3_service = uow['s3_service']
     file_service = uow['file_service']
 
+    # Получение ключа файла ДО удаления записи из БД
+    file = await file_service.get_file(file_id)
+    key = file.key
+
     await file_service.delete_file(file_id)
 
-    file = await file_service.get_file(file_id)
-    await s3_service.delete(file.key)
+    await s3_service.delete(key)
 
     return Response(status_code=status.HTTP_204_NO_CONTENT)

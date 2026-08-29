@@ -6,12 +6,22 @@ if os.path.exists(os.path.normpath("../../.env")):
     load_dotenv(dotenv_path=os.path.normpath("../../.env"))
 
 def get_self_public_ip():
-    conn = http.client.HTTPConnection("ifconfig.me")
-    conn.request("GET", "/ip")
-    return conn.getresponse().read().decode()
+    # Вызывается при импорте конфига: если ifconfig.me недоступен,
+    # приложение не должно падать на старте (значение используется
+    # только для списка CORS-origins, который и так перекрыт allow_origins=["*"])
+    try:
+        conn = http.client.HTTPConnection("ifconfig.me", timeout=5)
+        conn.request("GET", "/ip")
+        return conn.getresponse().read().decode()
+    except Exception:
+        return "127.0.0.1"
 
 class Configs:
     mode: str = os.environ.get('MODE')
+    # Двойной предохранитель от потери данных: очистка БД возможна ТОЛЬКО
+    # при MODE=test И явном ALLOW_DB_DROP=1 одновременно.
+    # Прод никогда не чистит базу — только создаёт недостающие таблицы.
+    allow_db_drop: bool = os.environ.get('ALLOW_DB_DROP') == '1'
     host_ip: str = get_self_public_ip()
     database_url: str = os.environ.get('DATABASE_URL')
     superuser_name: str = os.environ.get('SUPERUSER_NAME')
